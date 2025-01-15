@@ -1,0 +1,9 @@
+** Depenndency for navigation menu **
+
+npm install @react-navigation/native
+npm install react-native-screens react-native-safe-area-context react-native-gesture-handler react-native-reanimated react-native-vector-icons react-native-get-random-values
+npm install @react-navigation/drawer
+npx react-native link
+
+optional:
+expo install react-native-gesture-handler react-native-reanimated react-native-screens react-native-safe-area-context react-native-vector-icons react-native-get-random-values
