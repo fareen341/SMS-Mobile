@@ -1,150 +1,84 @@
 import * as React from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Importing Icon
 
-// Dasgboard Screen
+
+// Dashboard Screen
 function DashboardScreen({ navigation }) {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Dashboard Screen</Text>
-      <Button
-        title="Go to Personal Details"
-        onPress={() => navigation.navigate('Personal')}
-      />
+    <View style={styles.screenContainer}>
+      <View style={styles.container}>
+        {/* Box 1 */}
+        <View style={styles.box}>
+          <Text style={styles.text}>Box 1</Text>
+        </View>
+
+        {/* Box 2 */}
+        <View style={styles.box2}>
+          <Text style={styles.text}>Box 2</Text>
+        </View>
+      </View>
+
+      {/* Profile Box */}
+      
+      <View style={styles.profileBox}>
+        {/* Profile Icon */}
+        <Icon name="envelope" size={50} color="#333" style={styles.profileIcon} />
+        
+        {/* Profile Name */}
+        <Text style={styles.profileName}>My Complains</Text>
+      </View>
+      <View style={styles.profileBox}>
+        {/* Profile Icon */}
+        <Icon name="map" size={50} color="#333" style={styles.profileIcon} />
+        
+        {/* Profile Name */}
+        <Text style={styles.profileName}>Noc Requests</Text>
+      </View>
+      <View style={styles.profileBox}>
+        {/* Profile Icon */}
+        <Icon name="user" size={50} color="#333" style={styles.profileIcon} />
+        
+        {/* Profile Name */}
+        <Text style={styles.profileName}>Change Profile Info Request</Text>
+      </View>
+      <View style={styles.profileBox}>
+        {/* Profile Icon */}
+        <Icon name="building" size={50} color="#333" style={styles.profileIcon} />
+        
+        {/* Profile Name */}
+        <Text style={styles.profileName}>Change Flat Info Request</Text>
+      </View>
+
     </View>
   );
 }
 
-// Profile Screen
+// Profile Screen with Table
 function ProfileScreen({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>Profile Details</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
+      <Button title="Go back to Dashboard" onPress={() => navigation.goBack()} />
+
+      {/* Table in Profile Screen */}
+      <View style={styles.container}>
+        {/* Box 1 */}
+        <View style={[styles.box, styles.box1]}>
+          <Text style={styles.text}>Box 1</Text>
+        </View>
+
+        {/* Box 2 */}
+        <View style={[styles.box, styles.box2]}>
+          <Text style={styles.text}>Box 2</Text>
+        </View>
+      </View>
+
     </View>
   );
 }
-
-// House help Screen
-function HouseHelpScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>House Help Details</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-
-// Tenant Screen
-function TenantScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Tenant Details</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-// Meeting Screen
-function MeetingScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Meeting Details</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-
-// Office Screen
-function OfficeBearerScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Office Bearer Details</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-
-// Noc Screen
-function NocScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Noc Details</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-
-// Complain Screen
-function ComplainsScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Complains</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-
-// Personal Details Change Request Screen
-function PersonalDetailScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Personal Details Change Request</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-
-// Flat Repair Request Screen
-function FlatRepairRequestScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Flat Repair Requests</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-
-// Suggestions Request Screen
-function SuggestionsScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Suggestions Details</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-
-// Visitor Request Screen
-function VisitorRecordsScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Office Bearer Details</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-// Amenity Request Screen
-function AmenityScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Amenity</Text>
-      <Button title="Go back dashboard" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-
 
 // Drawer Navigator
 const Drawer = createDrawerNavigator();
@@ -154,18 +88,74 @@ export default function App() {
     <NavigationContainer>
       <Drawer.Navigator initialRouteName="Dashboard">
         <Drawer.Screen name="Dashboard" component={DashboardScreen} />
-        <Drawer.Screen name="HouseHelp" component={HouseHelpScreen} />
-        <Drawer.Screen name="Tenant" component={TenantScreen} />
-        <Drawer.Screen name="Meeting" component={MeetingScreen} />
-        <Drawer.Screen name="OfficeBearer" component={OfficeBearerScreen} />
-        <Drawer.Screen name="Noc" component={NocScreen} />
-        <Drawer.Screen name="Complain" component={ComplainsScreen} />
-        <Drawer.Screen name="Personal Detail Change Request" component={PersonalDetailScreen} />
-        <Drawer.Screen name="Flat Repair Request" component={FlatRepairRequestScreen} />
-        <Drawer.Screen name="Suggestions" component={SuggestionsScreen} />
-        <Drawer.Screen name="Visitor Records" component={VisitorRecordsScreen} />
-        <Drawer.Screen name="Amenity" component={AmenityScreen} />
+        <Drawer.Screen name="Profile" component={ProfileScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
 }
+
+
+
+const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,  // Ensures full screen height
+    justifyContent: 'flex-start',  // Align content to top of screen
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingTop: 20,
+  },
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  box: {
+    width: 150,
+    height: 150,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    backgroundColor: '#8080ff',
+    // Using CSS properties for web
+    backgroundImage: 'linear-gradient(45deg, #ff7e5f, #feb47b)',
+    borderRadius: 10,
+  },
+  box2: {
+    width: 150,
+    height: 150,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    backgroundColor: '#8080ff',
+    backgroundImage: 'linear-gradient(45deg, #6a11cb, #2575fc)',
+    borderRadius: 10,
+  },
+  text: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  profileBox: {
+    flexDirection: 'row', // Aligns items horizontally (side by side)
+    alignItems: 'center', // Vertically centers the content within the box
+    backgroundColor: '#fff',
+    width: '90%', // Takes 90% of the width of the container to give space on both sides
+    padding: 10,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    marginTop: 10, // Adds a little space between the two boxes and the profile box
+  },
+  profileIcon: {
+    marginRight: 10, // Space between the icon and the name
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+
+});
