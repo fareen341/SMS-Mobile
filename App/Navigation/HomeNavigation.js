@@ -1,8 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import DashboardScreen from "../Components/Dashboard/DashboardScreen";
-import ProfileScreen from "../Components/Profile/ProfileScreen";
+import TenantScreen from "../Components/Tenant/TenantScreen";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import MemberScreen from "../Components/Members/MemberScreen";
 const Drawer = createDrawerNavigator();
 // const Stack = createNativeStackNavigator();
 const HomeNavigation = () => {
@@ -19,7 +20,8 @@ const HomeNavigation = () => {
 
       <Drawer.Navigator initialRouteName="Dashboard">
         <Drawer.Screen name="Dashboard" component={DashboardScreen} />
-        <Drawer.Screen name="Profile" component={ProfileScreen} />
+        <Drawer.Screen name="Tenant" component={TenantScreen} />
+        <Drawer.Screen name="Members" component={MemberScreen} />
       </Drawer.Navigator>
     </>
   );

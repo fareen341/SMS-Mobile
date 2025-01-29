@@ -17,45 +17,48 @@ const DashboardScreen = () => {
           </View>
         </View>
 
-        {/* Profile Box */}
+        {/* tenant Box */}
 
-        <View style={styles.profileBox}>
-          {/* Profile Icon */}
+        <View style={styles.tenantBox}>
+          {/* tenant Icon */}
           <Icon
             name="envelope"
-            size={50}
+            size={25}
             color="#333"
-            style={styles.profileIcon}
+            style={styles.tenantIcon}
           />
 
-          {/* Profile Name */}
-          <Text style={styles.profileName}>My Complains</Text>
+          {/* tenant Name */}
+          <Text style={styles.tenantName}>My Complains</Text>
         </View>
-        <View style={styles.profileBox}>
-          {/* Profile Icon */}
-          <Icon name="map" size={50} color="#333" style={styles.profileIcon} />
+        <View style={styles.tenantBox}>
+          {/* tenant Icon */}
+          <Icon name="map" size={25} color="#333" style={styles.tenantIcon} />
 
-          {/* Profile Name */}
-          <Text style={styles.profileName}>Noc Requests</Text>
-        </View>
-        <View style={styles.profileBox}>
-          {/* Profile Icon */}
-          <Icon name="user" size={50} color="#333" style={styles.profileIcon} />
 
-          {/* Profile Name */}
-          <Text style={styles.profileName}>Change Profile Info Request</Text>
+
+
+          {/* tenant Name */}
+          <Text style={styles.tenantName}>Noc Requests</Text>
         </View>
-        <View style={styles.profileBox}>
-          {/* Profile Icon */}
+        <View style={styles.tenantBox}>
+          {/* tenant Icon */}
+          <Icon name="user" size={25} color="#333" style={styles.tenantIcon} />
+
+          {/* tenant Name */}
+          <Text style={styles.tenantName}>Change tenant Info Request</Text>
+        </View>
+        <View style={styles.tenantBox}>
+          {/* tenant Icon */}
           <Icon
             name="building"
-            size={50}
+            size={25}
             color="#333"
-            style={styles.profileIcon}
+            style={styles.tenantIcon}
           />
 
-          {/* Profile Name */}
-          <Text style={styles.profileName}>Change Flat Info Request</Text>
+          {/* tenant Name */}
+          <Text style={styles.tenantName}>Change Flat Info Request</Text>
         </View>
       </View>
     </>
@@ -105,7 +108,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  profileBox: {
+  tenantBox: {
     flexDirection: "row", // Aligns items horizontally (side by side)
     alignItems: "center", // Vertically centers the content within the box
     backgroundColor: "#fff",
@@ -116,12 +119,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 6,
-    marginTop: 10, // Adds a little space between the two boxes and the profile box
+    marginTop: 10, // Adds a little space between the two boxes and the tenant box
   },
-  profileIcon: {
+  tenantIcon: {
     marginRight: 10, // Space between the icon and the name
   },
-  profileName: {
+  tenantName: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
