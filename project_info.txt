@@ -18,6 +18,8 @@ React - Native - Table
 npm install react-native-table-component
 
 
+npm install react-native-snap-carousel(atul)
+
 
 
 
