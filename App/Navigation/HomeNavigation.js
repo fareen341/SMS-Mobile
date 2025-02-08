@@ -9,6 +9,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import NoticeBoard from "../Components/NoticeBoard/NoticeBoard";
 import Suggestion from "../Components/Suggestions/Suggestion";
 const Stack = createStackNavigator();
+import LoginScreen from "../Components/Login/LoginScreen";
+
 const Drawer = createDrawerNavigator();
 // const Stack = createNativeStackNavigator();
 const HomeNavigation = () => {
@@ -36,6 +38,7 @@ const HomeNavigation = () => {
         <Drawer.Screen name="Members" component={MemberScreen} />
         {/* <Drawer.Screen name="Notice" component={NoticeBoard} /> */}
         <Stack.Screen name="Suggestion" component={Suggestion} />
+        <Drawer.Screen name="Login" component={LoginScreen} />
       </Drawer.Navigator>
     </>
   );

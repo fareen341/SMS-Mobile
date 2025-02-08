@@ -1,56 +1,48 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, Button, TextInput } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome
+import { View, Text, StyleSheet, Modal, TextInput } from 'react-native';
+import { DataTable, Button, IconButton } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const TenantScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [initialTenant, setTenant] = useState([]);
+  const [tenants, setTenants] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-
-  console.log('..........', initialTenant);
-
-  const tableHead = ['Actions', 'Name', 'Contact', 'State', 'City'];
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 5; // Number of rows per page
 
   useEffect(() => {
-    axios.get('http://192.168.1.8:8000/api/tenant_creation/')
+    axios.get('https://society.zacoinfotech.com/api/tenant_creation/', {
+      headers: {
+          'Authorization': `Token d28a0f245d51623cd20e56413cd7691e71f1b043`,
+      }
+  })
       .then((response) => {
-        setTenant(response.data);
+        setTenants(response.data);
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
       });
   }, []);
 
-  // Filtered data based on search query
-  const filteredData = initialTenant.filter((item) =>
+  // Filter tenants based on search query
+  const filteredData = tenants.filter((item) =>
     item.tenant_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.tenant_contact.includes(searchQuery) ||
     item.tenant_state.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.tenant_city.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Handle eye icon click to open modal
   const handleEyeClick = (item) => {
     setSelectedItem(item);
     setModalVisible(true);
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.row}>
-      <TouchableOpacity style={styles.actionCell} onPress={() => handleEyeClick(item)}>
-        <Icon name="eye" size={20} color="#000" />
-      </TouchableOpacity>
-      <Text style={styles.cell}>{item.tenant_name}</Text>
-      <Text style={styles.cell}>{item.tenant_contact}</Text>
-      <Text style={styles.cell}>{item.tenant_state}</Text>
-      <Text style={styles.cell}>{item.tenant_city}</Text>
-    </View>
-  );
-
   return (
     <View style={styles.container}>
-      {/* Search Box */}
+      {/* Search Input */}
       <TextInput
         style={styles.searchInput}
         placeholder="Search by Name, Contact, State, City"
@@ -58,26 +50,40 @@ const TenantScreen = () => {
         onChangeText={setSearchQuery}
       />
 
-      {/* Table Header */}
-      <View style={[styles.row, styles.headerRow]}>
-        {tableHead.map((header, index) => (
-          <Text key={index} style={[styles.cell, styles.headerCell]}>
-            {header}
-          </Text>
+      {/* DataTable */}
+      <DataTable>
+        {/* Table Header */}
+        <DataTable.Header style={styles.header}>
+          <DataTable.Title style={styles.actionColumn}>Actions</DataTable.Title>
+          <DataTable.Title>Name</DataTable.Title>
+          <DataTable.Title>Contact</DataTable.Title>
+          <DataTable.Title>State</DataTable.Title>
+          <DataTable.Title>City</DataTable.Title>
+        </DataTable.Header>
+
+        {/* Table Rows */}
+        {filteredData.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map((item) => (
+          <DataTable.Row key={item.id}>
+            <DataTable.Cell style={styles.actionColumn}>
+              <IconButton icon="eye" size={20} onPress={() => handleEyeClick(item)} />
+            </DataTable.Cell>
+            <DataTable.Cell>{item.tenant_name}</DataTable.Cell>
+            <DataTable.Cell>{item.tenant_contact}</DataTable.Cell>
+            <DataTable.Cell>{item.tenant_state}</DataTable.Cell>
+            <DataTable.Cell>{item.tenant_city}</DataTable.Cell>
+          </DataTable.Row>
         ))}
-      </View>
 
-      {/* Table Body */}
-      <FlatList
-        data={filteredData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        ListEmptyComponent={
-          <Text style={styles.emptyMessage}>No data available</Text>
-        }
-      />
+        {/* Pagination Controls */}
+        <DataTable.Pagination
+          page={page}
+          numberOfPages={Math.ceil(filteredData.length / rowsPerPage)}
+          onPageChange={(newPage) => setPage(newPage)}
+          label={`${page * rowsPerPage + 1}-${Math.min((page + 1) * rowsPerPage, filteredData.length)} of ${filteredData.length}`}
+        />
+      </DataTable>
 
-      {/* Modal */}
+      {/* Modal for Tenant Details */}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -88,7 +94,7 @@ const TenantScreen = () => {
           <View style={styles.modalContent}>
             {selectedItem && (
               <>
-                <Text style={styles.modalTitle}>Details</Text>
+                <Text style={styles.modalTitle}>Tenant Details</Text>
                 <Text style={styles.modalText}>Name: {selectedItem.tenant_name}</Text>
                 <Text style={styles.modalText}>PAN: {selectedItem.tenant_pan_number}</Text>
                 <Text style={styles.modalText}>Contact: {selectedItem.tenant_contact}</Text>
@@ -97,7 +103,7 @@ const TenantScreen = () => {
                 <Text style={styles.modalText}>City: {selectedItem.tenant_city}</Text>
               </>
             )}
-            <Button title="Close" onPress={() => setModalVisible(false)} />
+            <Button mode="contained" onPress={() => setModalVisible(false)}>Close</Button>
           </View>
         </View>
       </Modal>
@@ -119,33 +125,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingLeft: 8,
   },
-  row: {
-    flexDirection: 'row',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-  },
-  headerRow: {
+  header: {
     backgroundColor: '#f8f9fa',
   },
-  cell: {
-    flex: 1,
-    textAlign: 'center',
-    paddingHorizontal: 4,
-  },
-  headerCell: {
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  actionCell: {
-    flex: 0.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyMessage: {
-    textAlign: 'center',
-    padding: 20,
-    color: '#888',
+  actionColumn: {
+    width: 60, // Set fixed width for the actions column
   },
   modalOverlay: {
     flex: 1,
