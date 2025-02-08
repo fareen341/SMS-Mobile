@@ -4,6 +4,11 @@ import DashboardScreen from "../Components/Dashboard/DashboardScreen";
 import TenantScreen from "../Components/Tenant/TenantScreen";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import MemberScreen from "../Components/Members/MemberScreen";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import NoticeBoard from "../Components/NoticeBoard/NoticeBoard";
+import Suggestion from "../Components/Suggestions/Suggestion";
+const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 // const Stack = createNativeStackNavigator();
 const HomeNavigation = () => {
@@ -17,11 +22,20 @@ const HomeNavigation = () => {
     <Stack.Screen name='course-chapter' component={CourseChapter}></Stack.Screen>
     
    </Stack.Navigator> */}
+      {/* <NavigationContainer> */}
+      {/* <Stack.Navigator>
+        <Stack.Screen name="Home" component={DashboardScreen} />
+        <Stack.Screen name="Next" component={MemberScreen} />
+      </Stack.Navigator> */}
+      {/* </NavigationContainer> */}
 
       <Drawer.Navigator initialRouteName="Dashboard">
         <Drawer.Screen name="Dashboard" component={DashboardScreen} />
+        {/* <Stack.Screen name="Home" component={DashboardScreen} /> */}
         <Drawer.Screen name="Tenant" component={TenantScreen} />
         <Drawer.Screen name="Members" component={MemberScreen} />
+        {/* <Drawer.Screen name="Notice" component={NoticeBoard} /> */}
+        <Stack.Screen name="Suggestion" component={Suggestion} />
       </Drawer.Navigator>
     </>
   );
