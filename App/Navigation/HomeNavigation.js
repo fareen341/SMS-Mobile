@@ -10,6 +10,15 @@ import NoticeBoard from "../Components/NoticeBoard/NoticeBoard";
 import Suggestion from "../Components/Suggestions/Suggestion";
 const Stack = createStackNavigator();
 import LoginScreen from "../Components/Login/LoginScreen";
+import HouseHelpScreen from "../Components/HouseHelp/HouseHelpScreen";
+import MeetingsScreen from "../Components/Meetings/MeetingsScreen";
+import OfficeBearerScreen from "../Components/OfficeBearer/OfficeBearerScreen";
+import NocScreen from "../Components/Noc/NocScreen";
+import ChangeMemberScreen from "../Components/ChangeMember/ChangeMemberScreen";
+import ChangeFlatInfoScreen from "../Components/ChangeFlatInfo/ChangeFlatInfoScreen";
+import VisitorRecordScreen from "../Components/VisitorRecord/VisitorRecordScreen";
+import AmenityScreen from "../Components/Amenity/AmenityScreen";
+import ComplainScreen from "../Components/Complain/ComplainScreen";
 
 const Drawer = createDrawerNavigator();
 // const Stack = createNativeStackNavigator();
@@ -39,6 +48,17 @@ const HomeNavigation = () => {
         {/* <Drawer.Screen name="Notice" component={NoticeBoard} /> */}
         <Stack.Screen name="Suggestion" component={Suggestion} />
         <Drawer.Screen name="Login" component={LoginScreen} />
+
+        <Drawer.Screen name="House Help" component={HouseHelpScreen} />
+        <Drawer.Screen name="Meetings" component={MeetingsScreen} />
+        <Drawer.Screen name="Office Bearer" component={OfficeBearerScreen} />
+        <Drawer.Screen name="Noc" component={NocScreen} />
+        <Drawer.Screen name="Complain" component={ComplainScreen} />
+        <Drawer.Screen name="Change in Member Info" component={ChangeMemberScreen} />
+        <Drawer.Screen name="Change in Flat Info" component={ChangeFlatInfoScreen} />
+        <Drawer.Screen name="Visitor" component={VisitorRecordScreen} />
+        <Drawer.Screen name="Amenity" component={AmenityScreen} />
+
       </Drawer.Navigator>
     </>
   );
