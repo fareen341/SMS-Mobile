@@ -7,8 +7,9 @@ import {
   View,
 } from "react-native";
 import React, { useState } from "react";
-import Icon from "react-native-vector-icons/FontAwesome";
+import { DataTable, Button, IconButton } from "react-native-paper";
 const SuggestionCard = ({ item }) => {
+  console.log("item",item)
   const [selectedItem, setSelectedItem] = useState(null);
 
   const handleEyeClick = (item) => {
@@ -16,6 +17,8 @@ const SuggestionCard = ({ item }) => {
     setModalVisible(true);
   };
   const [modalVisible, setModalVisible] = useState(false);
+  //  const [modalVisible, setModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
   // console.log("file",file)
@@ -25,10 +28,21 @@ const SuggestionCard = ({ item }) => {
       setFile(result);
     }
   };
+  const handleViewClick = (item) => {
+    setSelectedItem(item);
+    setModalVisible(true);
+  };
 
+  // Handle edit icon click (Open blank modal)
+  const handleEditClick = (item) => {
+    // setSelectedItem(item);
+    // setEditModalVisible(true);
+    setSelectedItem(item);
+    setEditModalVisible(true);
+  };
   return (
     <>
-      <View style={styles.actionContainer}>
+      {/* <View style={styles.actionContainer}>
         <TouchableOpacity
           onPress={() => handleEyeClick(item)}
           style={styles.iconButton}
@@ -42,48 +56,101 @@ const SuggestionCard = ({ item }) => {
           <Icon name="edit" size={20} color="#4169E1" />
         </TouchableOpacity>
 
-        {/* ////////Edit Modal/// */}
-        <Modal
-          visible={modalVisible}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Create Suggestion</Text>
+      </View> */}
+      <View style={styles.iconContainer1}>
+        <IconButton
+          icon="eye"
+          size={20}
+          onPress={() => handleViewClick(item)}
+          style={styles.iconButton}
+        />
+        <IconButton
+          icon="pencil"
+          size={20}
+          onPress={() => handleEditClick(item)}
+          style={styles.iconButton}
+        />
+      </View>
+      {/* ////////Edit Modal/// */}
+      <Modal
+        visible={editModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Create Suggestion</Text>
 
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Your Suggestion"
-                value={text}
-                onChangeText={setText}
-              />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter Your Suggestion"
+              value={text}
+              onChangeText={setText}
+            />
 
-              <TouchableOpacity style={styles.fileButton} onPress={pickFile}>
-                <Text style={styles.fileButtonText}>
-                  {file ? `Selected: ${file?.assets[0]?.name}` : "Pick a File"}
-                </Text>
+            <TouchableOpacity style={styles.fileButton} onPress={pickFile}>
+              <Text style={styles.fileButtonText}>
+                {file ? `Selected: ${file?.assets[0]?.name}` : "Pick a File"}
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Close</Text>
               </TouchableOpacity>
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text style={styles.buttonText}>Close</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.submitButton}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text style={styles.buttonText}>Submit</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Submit</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
+
+      {/* View Details Modal */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {selectedItem && (
+              <>
+                <Text style={styles.modalTitle}>Tenant Details</Text>
+                <Text style={styles.modalText}>
+                  Name: {selectedItem.tenant_name}
+                </Text>
+                <Text style={styles.modalText}>
+                  PAN: {selectedItem.tenant_pan_number}
+                </Text>
+                <Text style={styles.modalText}>
+                  Contact: {selectedItem.tenant_contact}
+                </Text>
+                <Text style={styles.modalText}>
+                  Aadhar: {selectedItem.tenant_aadhar_number}
+                </Text>
+                <Text style={styles.modalText}>
+                  State: {selectedItem.tenant_state}
+                </Text>
+                <Text style={styles.modalText}>
+                  City: {selectedItem.tenant_city}
+                </Text>
+              </>
+            )}
+            <Button mode="contained" onPress={() => setModalVisible(false)}>
+              Close
+            </Button>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 };
@@ -101,12 +168,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     color: "C4D9FF",
   },
+  iconContainer1: {
+    flexDirection: "row", // Ensures icons stay side by side
+    alignItems: "center",
+  },
+  iconButton: {
+    marginHorizontal: -4, // Negative margin to remove all space
+    padding: 0, // Ensures no extra padding
+  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
