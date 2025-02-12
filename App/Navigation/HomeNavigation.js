@@ -13,12 +13,13 @@ import LoginScreen from "../Components/Login/LoginScreen";
 import HouseHelpScreen from "../Components/HouseHelp/HouseHelpScreen";
 import MeetingsScreen from "../Components/Meetings/MeetingsScreen";
 import OfficeBearerScreen from "../Components/OfficeBearer/OfficeBearerScreen";
-import NocScreen from "../Components/Noc/NocScreen";
 import ChangeMemberScreen from "../Components/ChangeMember/ChangeMemberScreen";
 import ChangeFlatInfoScreen from "../Components/ChangeFlatInfo/ChangeFlatInfoScreen";
 import VisitorRecordScreen from "../Components/VisitorRecord/VisitorRecordScreen";
 import AmenityScreen from "../Components/Amenity/AmenityScreen";
 import ComplainScreen from "../Components/Complain/ComplainScreen";
+import NocScreen from "../Components/Noc/NocScreen";
+import LogoutScreen from "../Components/Logout/LogoutScreen";
 
 const Drawer = createDrawerNavigator();
 // const Stack = createNativeStackNavigator();
@@ -58,7 +59,8 @@ const HomeNavigation = () => {
         <Drawer.Screen name="Change in Flat Info" component={ChangeFlatInfoScreen} />
         <Drawer.Screen name="Visitor" component={VisitorRecordScreen} />
         <Drawer.Screen name="Amenity" component={AmenityScreen} />
-
+        <Drawer.Screen name="Logout" component={LogoutScreen} />
+        
       </Drawer.Navigator>
     </>
   );
