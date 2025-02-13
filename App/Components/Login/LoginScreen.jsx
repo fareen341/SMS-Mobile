@@ -1,22 +1,47 @@
 import React, { useState } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, StyleSheet, 
-  Image, Alert, 
+  Alert, ActivityIndicator
 } from 'react-native';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const navigation = useNavigation();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password.');
+  const handleLogin = async () => {
+    if (!username || !password) {
+      Alert.alert('Error', 'Please enter both username and password.');
       return;
     }
 
-    Alert.alert('Login Successful', `Welcome ${email}`);
+    setLoading(true);
+    try {
+      const response = await axios.post('https://society.zacoinfotech.com/api/login/', {
+        username,
+        password,
+      });
+
+      const result = response.data;
+
+      if (response.status === 200) {
+        await AsyncStorage.setItem('authToken', response.data.auth_token);
+        Alert.alert('Login Successful', `Welcome ${response.data.auth_token}`);
+        navigation.navigate('Dashboard');
+      } else {
+        Alert.alert('Login Failed', result.message || 'Invalid credentials');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to connect to the server', error.response.data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,8 +57,8 @@ const Login = () => {
             <TextInput
               style={styles.input}
               placeholder="Username"
-              value={email}
-              onChangeText={setEmail}
+              value={username}
+              onChangeText={setUsername}
               autoCapitalize="none"
             />
           </View>
@@ -49,8 +74,12 @@ const Login = () => {
             />
           </View>
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginText}>LOGIN</Text>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginText}>LOGIN</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.message}>
@@ -80,16 +109,16 @@ const Login = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(135, 206, 235, 0.7)', // Skyblue transparent background
+    backgroundColor: 'rgba(135, 206, 235, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   formBox: {
     width: 350,
-    backgroundColor: 'grey', // Grey color for form box
+    backgroundColor: 'grey',
     padding: 20,
     borderRadius: 10,
-    opacity: 0.9, // Slightly transparent form
+    opacity: 0.9,
   },
   headerForm: {
     alignItems: 'center',
@@ -126,10 +155,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   message: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginTop: 15,
-    alignItems: 'center',
   },
   forgotPassword: {
     color: '#007bff',

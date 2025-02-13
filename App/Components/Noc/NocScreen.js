@@ -1,11 +1,29 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Modal, TextInput, ScrollView, TouchableOpacity } from 'react-native';
 import { DataTable, Button, IconButton } from 'react-native-paper';
 import { Dropdown } from 'react-native-element-dropdown';
+import { View, Text, StyleSheet, Modal, TextInput, ScrollView, TouchableOpacity, useWindowDimensions } from 'react-native';
+import RenderHtml from 'react-native-render-html';
+import { WebView } from 'react-native-webview';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+
 
 
 const NocScreen = () => {
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem('authToken');
+      if (token) {
+        navigation.replace('Dashboard');
+      }
+    };
+    checkAuth();
+  }, [navigation]);
+
+  const { width } = useWindowDimensions();
   const [nocList, setNocList] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -14,11 +32,12 @@ const NocScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
   const rowsPerPage = 5;
+  const [viewModalVisible, setViewModalVisible] = useState(false);
 
   const [newNoc, setNewNoc] = useState({
-    noc_type: '',
+    noc_type_display: '',
     flat_owner: '',
-    flat_no: '',
+    flat_no_name: '',
     address: '',
     noc_content: '',
   });
@@ -37,7 +56,7 @@ const NocScreen = () => {
   ];
 
   useEffect(() => {
-    axios.get('https://society.zacoinfotech.com/api/noc/', {
+    axios.get('https://society.zacoinfotech.com/api/noc_api/', {
       headers: { 'Authorization': `Token e0ba9a7bd3574f04d91315f4452deaa6262880df` },
     })
       .then((response) => setNocList(response.data))
@@ -46,22 +65,40 @@ const NocScreen = () => {
 
   const handleViewClick = (item) => {
     setSelectedItem(item);
-    setModalVisible(true);
+    setViewModalVisible(true);
   };
 
   const handleEditClick = (item) => {
     setSelectedItem(item);
-    setNewNoc({ ...item });
+    setNewNoc({
+      ...item,
+      noc_content: '', // Ensure content starts empty
+    });
     setEditModalVisible(true);
   };
 
   const handleAddNoc = () => {
-    setNewNoc({ noc_type: '', flat_owner: '', flat_no: '', address: '', noc_content: '' });
+    setNewNoc({
+      noc_type_display: '',
+      flat_owner: '',
+      flat_no_name: '',
+      address: '',
+      noc_content: '',
+    });
     setAddNocModalVisible(true);
   };
-
+  
   const handleNocTypeChange = (value) => {
-    setNewNoc({ ...newNoc, noc_type: value, noc_content: generateNocContent(value) });
+    setNewNoc({
+      ...newNoc,
+      noc_type_display: value,
+      noc_content: generateNocContent(value), // Update content based on type
+    });
+  };
+
+  const closeModal = () => {
+    setAddNocModalVisible(false);
+    setEditModalVisible(false);
   };
 
   const generateNocContent = (nocType) => {
@@ -91,12 +128,12 @@ const NocScreen = () => {
 
   // const filteredData = nocList.filter((item) =>
   //   item.flat_owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //   item.flat_no.includes(searchQuery)
+  //   item.flat_no_name.includes(searchQuery)
   // );
 
   const filteredData = nocList.filter((item) =>
-    (typeof item.flat_owner === 'string' && item.flat_owner.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (typeof item.flat_no === 'string' && item.flat_no.toLowerCase().includes(searchQuery.toLowerCase()))
+    (typeof item.flat_owner_name === 'string' && item.flat_owner_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (typeof item.flat_no_name === 'string' && item.flat_no_name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -116,21 +153,21 @@ const NocScreen = () => {
       <DataTable>
         <DataTable.Header style={styles.header}>
           <DataTable.Title style={styles.actionColumn}>Actions</DataTable.Title>
-          <DataTable.Title>Flat Owner</DataTable.Title>
-          <DataTable.Title>Flat No</DataTable.Title>
           <DataTable.Title>NOC Type</DataTable.Title>
+          <DataTable.Title>Flat No</DataTable.Title>
         </DataTable.Header>
 
         {filteredData.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map((item) => (
           <DataTable.Row key={item.id}>
-            <DataTable.Cell style={styles.actionColumn}>
-              <IconButton icon="eye" size={20} onPress={() => handleViewClick(item)} />
-              <IconButton icon="pencil" size={20} onPress={() => handleEditClick(item)} />
-            </DataTable.Cell>
-            <DataTable.Cell>{item.flat_owner}</DataTable.Cell>
-            <DataTable.Cell>{item.flat_no}</DataTable.Cell>
-            <DataTable.Cell>{item.noc_type}</DataTable.Cell>
-          </DataTable.Row>
+          <DataTable.Cell style={styles.actionColumn}>
+            <View style={styles.iconContainer}>
+              <IconButton icon="eye" size={20} onPress={() => handleViewClick(item)} style={styles.iconButton} />
+              <IconButton icon="pencil" size={20} onPress={() => handleEditClick(item)} style={styles.iconButton} />
+            </View>
+          </DataTable.Cell>
+          <DataTable.Cell>{item.noc_type_display}</DataTable.Cell>
+          <DataTable.Cell>{item.flat_no_name}</DataTable.Cell>
+        </DataTable.Row>
         ))}
 
         <DataTable.Pagination
@@ -141,43 +178,107 @@ const NocScreen = () => {
         />
       </DataTable>
 
+      {/* View NOC Modal */}
+      <Modal visible={viewModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>NOC Details</Text>
+            {selectedItem && (
+              <ScrollView>
+                <Text style={styles.modalText}><Text style={styles.bold}>NOC Type:</Text> {selectedItem.noc_type_display}</Text>
+                <Text style={styles.modalText}><Text style={styles.bold}>Flat Owner:</Text> {selectedItem.flat_owner_name}</Text>
+                <Text style={styles.modalText}><Text style={styles.bold}>Flat No:</Text> {selectedItem.flat_no_name}</Text>
+                <Text style={styles.modalText}><Text style={styles.bold}>Address:</Text> {selectedItem.address}</Text>
+
+                <RenderHtml contentWidth={width - 40} source={{ html: selectedItem.noc_content || '' }} />
+
+              </ScrollView>
+            )}
+            <Button mode="outlined" onPress={() => setViewModalVisible(false)}>Close</Button>
+          </View>
+        </View>
+      </Modal>
+
       {/* Add/Edit NOC Modal */}
       <Modal visible={addNocModalVisible || editModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-          <Dropdown
+            <Dropdown
               style={styles.input}
               data={nocChoices}
-              labelField="label"  // The field that contains the display text
-              valueField="value"  // The field that contains the value
+              labelField="label"
+              valueField="value"
               placeholder="Select NOC Type"
-              value={newNoc.noc_type}
-              onChange={item => handleNocTypeChange(item.value)}
+              value={newNoc.noc_type_display}
+              onChange={(item) => handleNocTypeChange(item.value)}
             />
 
             <TextInput style={styles.input} placeholder="Flat Owner" value={newNoc.flat_owner} />
-            <TextInput style={styles.input} placeholder="Flat No" value={newNoc.flat_no} />
+            <TextInput style={styles.input} placeholder="Flat No" value={newNoc.flat_no_name} />
             <TextInput style={styles.input} placeholder="Address" value={newNoc.address} />
-            <TextInput style={styles.input} placeholder="NOC Content" value={newNoc.noc_content} multiline />
+
+            {/* CKEditor inside WebView */}
+            <View style={{ height: 300, width: '100%', marginBottom: 10 }}>
+              <WebView
+                originWhitelist={['*']}
+                source={{
+                  html: `
+                  <html>
+                  <head>
+                    <script src="https://cdn.ckeditor.com/4.20.1/standard/ckeditor.js"></script>
+                  </head>
+                  <body>
+                    <textarea id="editor">${newNoc.noc_content || ''}</textarea>
+                    <script>
+                      CKEDITOR.replace('editor');
+                      CKEDITOR.instances.editor.on('change', function() {
+                        window.ReactNativeWebView.postMessage(CKEDITOR.instances.editor.getData());
+                      });
+                    </script>
+                  </body>
+                  </html>
+                  `,
+                }}
+                javaScriptEnabled
+                onMessage={(event) => {
+                  setNewNoc({ ...newNoc, noc_content: event.nativeEvent.data });
+                }}
+              />
+            </View>
 
             <Button mode="contained">Save</Button>
-            <Button mode="outlined" onPress={() => setAddNocModalVisible(false)}>Close</Button>
+            <Button mode="outlined" onPress={closeModal}>Close</Button>
           </View>
         </View>
       </Modal>
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'left', marginBottom: 10 },
   nocText: { fontSize: 18, fontWeight: 'bold' },
   searchInput: { borderWidth: 1, borderColor: '#ccc', padding: 8, marginBottom: 10 },
-  actionColumn: { flex: 1, flexDirection: 'row', justifyContent: 'center' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { width: '80%', padding: 20, backgroundColor: '#fff', borderRadius: 10 },
   input: { borderWidth: 1, borderColor: '#ccc', padding: 8, minHeight: 40, marginBottom: 10 },
+  actionColumn: {
+    flex: 0.6,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4, // Adjust space between icons
+  },
+  iconButton: {
+    marginHorizontal: -6, // Adjust spacing between buttons
+    padding: 0,
+  },
 });
 
 

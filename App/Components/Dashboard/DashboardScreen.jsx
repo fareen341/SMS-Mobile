@@ -28,6 +28,8 @@ import {
 } from "react-native";
 import NoticeBoard from "../NoticeBoard/NoticeBoard";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useEffect } from 'react';
+
 
 const transactions = [
   {
@@ -132,7 +134,31 @@ const notices = [
     date: "Jan 25, 2025",
   },
 ];
-const DashboardScreen = ({ navigation }) => {
+const DashboardScreen = () => {
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const checkAuthToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('authToken');
+
+        // Alert to display the retrieved token
+        Alert.alert('Token Status', token ? `Welcome! Token: ${token}` : 'No token found');
+
+        if (!token) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+          });
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Failed to retrieve authentication token');
+      }
+    };
+
+    checkAuthToken();
+  }, [navigation]);
+
   return (
     <>
       <SafeAreaProvider>

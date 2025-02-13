@@ -120,22 +120,74 @@ const ComplainScreen = () => {
       <Modal visible={editModalVisible} transparent animationType="slide" onRequestClose={() => setEditModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TextInput style={styles.textArea} placeholder="Name" value={selectedItem?.name} />
-            <TextInput style={styles.textArea} placeholder="Title" value={selectedItem?.title} />
-            <TextInput style={styles.textArea} placeholder="Description" value={selectedItem?.complain_description} multiline />
-            <TextInput style={styles.textArea} placeholder="Status" value={selectedItem?.status} />
+            <TextInput style={styles.textArea1} placeholder="Name" value={selectedItem?.name} />
+            <TextInput style={styles.textArea1} placeholder="Title" value={selectedItem?.title} />
+            <TextInput style={styles.textArea1} placeholder="Description" value={selectedItem?.complain_description} multiline />
+            <TextInput style={styles.textArea1} placeholder="Status" value={selectedItem?.status} />
             <Button mode="contained" compact>Save</Button>
             <Button mode="outlined" compact onPress={() => setEditModalVisible(false)}>Close</Button>
           </View>
         </View>
       </Modal>
 
-      {/* Add Message Modal */}
+      {/* WhatsApp-Style Chat Modal */}
       <Modal visible={messageModalVisible} transparent animationType="slide" onRequestClose={() => setMessageModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <TextInput style={styles.textArea} placeholder="Add message" value={messageText} onChangeText={setMessageText} />
-            <Button mode="contained" compact>Send</Button>
+          <View style={styles.chatContainer}>
+            {/* Chat Header */}
+            <View style={styles.chatHeader}>
+              <Text style={styles.chatTitle}>Chat</Text>
+            </View>
+
+            {/* Chat Messages - Scrollable */}
+            <ScrollView style={styles.chatBody}>
+              <View style={styles.receivedMessage}>
+                <Text style={styles.messageText}>Hello! How can I help you?</Text>
+              </View>
+              <View style={styles.sentMessage}>
+                <Text style={styles.messageText}>I need some information about the NOC process.</Text>
+              </View>
+              <View style={styles.receivedMessage}>
+                <Text style={styles.messageText}>Sure! What type of NOC are you looking for?</Text>
+              </View>
+              <View style={styles.sentMessage}>
+                <Text style={styles.messageText}>I need an NOC for my electricity meter transfer.</Text>
+              </View>
+              <View style={styles.receivedMessage}>
+                <Text style={styles.messageText}>Alright. Do you have all the required documents?</Text>
+              </View>
+              <View style={styles.sentMessage}>
+                <Text style={styles.messageText}>Yes, I have my property documents and ID proof.</Text>
+              </View>
+              <View style={styles.receivedMessage}>
+                <Text style={styles.messageText}>Great! You can apply through the society office or online.</Text>
+              </View>
+              <View style={styles.sentMessage}>
+                <Text style={styles.messageText}>Can I download the NOC form from the portal?</Text>
+              </View>
+              <View style={styles.receivedMessage}>
+                <Text style={styles.messageText}>Yes! Log in and go to the NOC section to download it.</Text>
+              </View>
+              <View style={styles.sentMessage}>
+                <Text style={styles.messageText}>Thanks! I'll check and apply soon.</Text>
+              </View>
+              <View style={styles.receivedMessage}>
+                <Text style={styles.messageText}>You're welcome! Let me know if you need further help.</Text>
+              </View>
+            </ScrollView>
+
+            {/* Chat Input */}
+            <View style={styles.chatFooter}>
+              <TextInput
+                style={styles.textArea}
+                placeholder="Type a message..."
+                value={messageText}
+                onChangeText={setMessageText}
+              />
+              <Button mode="contained" compact onPress={() => console.log('Message Sent:', messageText)}>Send</Button>
+            </View>
+
+            {/* Close Button */}
             <Button mode="outlined" compact onPress={() => setMessageModalVisible(false)}>Close</Button>
           </View>
         </View>
@@ -145,8 +197,8 @@ const ComplainScreen = () => {
       <Modal visible={addComplainModalVisible} transparent animationType="slide" onRequestClose={() => setAddComplainModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TextInput style={styles.textArea} placeholder="Title" value={newComplainTitle} onChangeText={setNewComplainTitle} />
-            <TextInput style={styles.textArea} placeholder="Complain Details" multiline value={newComplainMessage} onChangeText={setNewComplainMessage} />
+            <TextInput style={styles.textArea1} placeholder="Title" value={newComplainTitle} onChangeText={setNewComplainTitle} />
+            <TextInput style={styles.textArea1} placeholder="Complain Details" multiline value={newComplainMessage} onChangeText={setNewComplainMessage} />
             <Button mode="contained" compact>Submit</Button>
             <Button mode="outlined" compact onPress={() => setAddComplainModalVisible(false)}>Close</Button>
           </View>
@@ -165,7 +217,61 @@ const styles = StyleSheet.create({
   iconButton: { padding: 0, marginHorizontal: -6 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { width: '80%', padding: 20, backgroundColor: '#fff', borderRadius: 10 },
-  textArea: { borderWidth: 1, borderColor: '#ccc', padding: 8, minHeight: 40, marginBottom: 10 },
+  textArea1: { borderWidth: 1, borderColor: '#ccc', padding: 8, minHeight: 40, marginBottom: 10 },
+  chatContainer: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    overflow: 'hidden',
+    maxHeight: '80%',  // Prevents overflow
+  },
+  chatHeader: {
+    backgroundColor: '#2e86c1',
+    padding: 10,
+  },
+  chatTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  chatBody: {
+    maxHeight: 400,  // Scrollable chat area
+    padding: 10,
+  },
+  chatFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+  },
+  textArea: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  sentMessage: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#d1f2eb',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 5,
+    maxWidth: '75%',
+  },
+  receivedMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#ECECEC',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 5,
+    maxWidth: '75%',
+  },
+  messageText: {
+    fontSize: 14,
+  },
 });
 
 export default ComplainScreen;
