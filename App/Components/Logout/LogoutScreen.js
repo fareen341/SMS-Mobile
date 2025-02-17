@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
@@ -8,9 +8,25 @@ const LogoutScreen = () => {
 
   useEffect(() => {
     const logout = async () => {
-      await AsyncStorage.removeItem('authToken'); // Remove token
-      navigation.navigate('Login'); // Redirect to Login
+      try {
+        // Clear auth token
+        await AsyncStorage.removeItem('authToken');
+        
+        // Debugging: Confirm token removal
+        const token = await AsyncStorage.getItem('authToken');
+        console.log('Token after removal:', token);
+
+        // Navigate to Login screen
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Login' }],
+        });
+      } catch (error) {
+        Alert.alert('Logout Error', error.message);
+        console.error('Logout failed:', error);
+      }
     };
+
     logout();
   }, [navigation]);
 

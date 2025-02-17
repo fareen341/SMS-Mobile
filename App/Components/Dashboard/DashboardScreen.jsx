@@ -7,6 +7,7 @@ import {
   Dimensions,
   ScrollView,
   Button,
+  Alert
 } from "react-native";
 import React from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -29,6 +30,8 @@ import {
 import NoticeBoard from "../NoticeBoard/NoticeBoard";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 const transactions = [
@@ -141,23 +144,26 @@ const DashboardScreen = () => {
     const checkAuthToken = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
-
-        // Alert to display the retrieved token
-        Alert.alert('Token Status', token ? `Welcome! Token: ${token}` : 'No token found');
+        console.log('Token retrieved:', token);
 
         if (!token) {
+          // Alert.alert('Auth Token Missing', 'Redirecting to Login');
           navigation.reset({
             index: 0,
             routes: [{ name: 'Login' }],
           });
+        } else {
+          Alert.alert('Token Found', `Welcome! Token: ${token}`);
         }
       } catch (error) {
-        Alert.alert('Error', 'Failed to retrieve authentication token');
+        console.error('AsyncStorage Error:', error);
+        Alert.alert('Error', `Failed to retrieve authentication token: ${error.message}`);
       }
     };
 
     checkAuthToken();
   }, [navigation]);
+
 
   return (
     <>

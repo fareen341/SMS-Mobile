@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import { React, useState, useEffect} from "react";
 import DashboardScreen from "../Components/Dashboard/DashboardScreen";
 import TenantScreen from "../Components/Tenant/TenantScreen";
 import { createDrawerNavigator } from "@react-navigation/drawer";
@@ -22,8 +22,22 @@ import NocScreen from "../Components/Noc/NocScreen";
 import LogoutScreen from "../Components/Logout/LogoutScreen";
 
 const Drawer = createDrawerNavigator();
-// const Stack = createNativeStackNavigator();
 const HomeNavigation = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem('authToken');
+      setIsAuthenticated(!!token); // Set to true if token exists
+    };
+
+    checkAuth();
+  }, []);
+
+  // if (!isAuthenticated) {
+  //   return <LoginScreen />;
+  // }
+
   return (
     <>
       <Drawer.Navigator initialRouteName="Dashboard">
