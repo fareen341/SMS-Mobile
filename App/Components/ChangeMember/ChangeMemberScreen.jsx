@@ -9,6 +9,7 @@ import {
   Linking,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 
 import { DataTable, Button, IconButton } from "react-native-paper";
@@ -16,9 +17,10 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { FontAwesome } from "@expo/vector-icons"; // Or use any other icon library
 import * as DocumentPicker from "expo-document-picker";
 import Toast from "react-native-toast-message";
-import VisitorCreation from "./VisitorCreation";
+import CreateMemberInfo from "./CreateMemberInfo";
+import RenderHtml from "react-native-render-html";
 
-const VisitorRecordScreen = () => {
+const ChangeMemberScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [visitors, setVisitors] = useState([]);
@@ -33,7 +35,7 @@ const VisitorRecordScreen = () => {
 
   const fetchVisitors = () => {
     axios
-      .get("https://society.zacoinfotech.com/api/visitor_records/", {
+      .get("https://society.zacoinfotech.com/api/change_member_request/", {
         headers: {
           Authorization: `Token e0ba9a7bd3574f04d91315f4452deaa6262880df`,
         },
@@ -52,19 +54,16 @@ const VisitorRecordScreen = () => {
 
   const filteredData = visitors.filter((item) =>
     [
-      item.full_name,
-      item.contact_no,
-      item.email,
-      item.visit_purpose,
-      item.additional_note,
-      item.visitor_id,
-      item.wing_flat_display,
-    ]
-      .some((field) =>
-        (field?.toLowerCase() || "").includes(searchQuery.toLowerCase())
-      )
+      item.owner_name,
+      item.owner_contact,
+      item.owner_email,
+      item.title,
+      item.complain_description,
+      item.wing_flat_name,
+    ].some((field) =>
+      (field?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+    )
   );
-  
 
   const handleViewClick = (item) => {
     setSelectedItem(item);
@@ -186,7 +185,7 @@ const VisitorRecordScreen = () => {
           },
         }
       );
-    
+
       if (response.status === 200 || response.status === 201) {
         setEditModalVisible(false); // Modal band karna
         showToast("success", "🎉 Success!", "Visitor updated successfully.");
@@ -201,7 +200,10 @@ const VisitorRecordScreen = () => {
         fetchVisitors(); // Data update karna
       }
     } catch (error) {
-      console.error("Error submitting visitor:", error.response?.data || error.message);
+      console.error(
+        "Error submitting visitor:",
+        error.response?.data || error.message
+      );
       showToast("error", "⚠️ Submission Failed", "Something went wrong!");
     } finally {
       setLoading(false);
@@ -214,7 +216,8 @@ const VisitorRecordScreen = () => {
         <View style={styles.header1}>
           <Text style={styles.title}>WORKROOM</Text>
           <View style={[styles.iconContainer, { backgroundColor: "#4169E1" }]}>
-            <VisitorCreation fetchVisitors={fetchVisitors} />
+        
+            <CreateMemberInfo fetchVisitors={fetchVisitors} />
           </View>
         </View>
 
@@ -236,16 +239,14 @@ const VisitorRecordScreen = () => {
               </Text>
             </DataTable.Title>
             <DataTable.Title>
-              <Text style={{ color: "#ffffff", fontWeight: "bold" }}>Name</Text>
-            </DataTable.Title>
-            <DataTable.Title>
               <Text style={{ color: "#ffffff", fontWeight: "bold" }}>
-                Email
+                Title
               </Text>
             </DataTable.Title>
+
             <DataTable.Title>
               <Text style={{ color: "#ffffff", fontWeight: "bold" }}>
-                Contact
+               Wing Flat
               </Text>
             </DataTable.Title>
           </DataTable.Header>
@@ -263,18 +264,17 @@ const VisitorRecordScreen = () => {
                       onPress={() => handleViewClick(item)}
                       style={styles.iconButton}
                     />
-                    <IconButton
+                    {/* <IconButton
                       icon="pencil"
                       size={20}
                       onPress={() => handleEditClick(item)}
                       style={styles.iconButton}
-                    />
+                    /> */}
                   </View>
                 </DataTable.Cell>
 
-                <DataTable.Cell>{item.full_name}</DataTable.Cell>
-                <DataTable.Cell>{item.email}</DataTable.Cell>
-                <DataTable.Cell>{item.contact_no}</DataTable.Cell>
+                <DataTable.Cell>{item.title}</DataTable.Cell>
+                <DataTable.Cell>{item.wing_flat_name}</DataTable.Cell>
               </DataTable.Row>
             ))}
 
@@ -305,80 +305,68 @@ const VisitorRecordScreen = () => {
                   <Text style={styles.modalTitle}>Visitor Details</Text>
 
                   <View style={styles.infoContainer}>
-                    <Text style={styles.label}>Name:</Text>
+                    <Text style={styles.label}>Owner Name:</Text>
                     <Text style={styles.value}>
-                      {selectedItem?.full_name || "N/A"}
+                      {selectedItem?.owner_name || "N/A"}
                     </Text>
                   </View>
-
                   <View style={styles.infoContainer}>
-                    <Text style={styles.label}>Visitor ID:</Text>
+                    <Text style={styles.label}>Owner Email:</Text>
                     <Text style={styles.value}>
-                      {selectedItem?.visitor_id || "N/A"}
+                      {selectedItem?.owner_email || "N/A"}
                     </Text>
                   </View>
-
                   <View style={styles.infoContainer}>
-                    <Text style={styles.label}>Contact No:</Text>
+                    <Text style={styles.label}>Owner Contact:</Text>
                     <Text style={styles.value}>
-                      {selectedItem?.contact_no || "N/A"}
+                      {selectedItem?.owner_contact || "N/A"}
                     </Text>
                   </View>
-
                   <View style={styles.infoContainer}>
-                    <Text style={styles.label}>Email:</Text>
+                    <Text style={styles.label}>Wing Flat:</Text>
                     <Text style={styles.value}>
-                      {selectedItem?.email || "N/A"}
+                      {selectedItem?.wing_flat_name || "N/A"}
                     </Text>
                   </View>
-
-                  <View style={styles.infoContainer}>
-                    <Text style={styles.label}>Visit Purpose:</Text>
-                    <Text style={styles.value}>
-                      {selectedItem?.visit_purpose || "N/A"}
-                    </Text>
-                  </View>
-
-                  <View style={styles.infoContainer}>
-                    <Text style={styles.label}>Additional Note:</Text>
-                    <Text style={styles.value}>
-                      {selectedItem?.additional_note || "N/A"}
-                    </Text>
-                  </View>
-
                   <View style={styles.infoContainer}>
                     <Text style={styles.label}>Status:</Text>
                     <Text style={styles.value}>
                       {selectedItem?.status || "N/A"}
                     </Text>
                   </View>
-
                   <View style={styles.infoContainer}>
-                    <Text style={styles.label}>Wing & Flat:</Text>
+                    <Text style={styles.label}>Title:</Text>
                     <Text style={styles.value}>
-                      {selectedItem?.wing_flat_display || "N/A"}
+                      {selectedItem?.title || "N/A"}
                     </Text>
                   </View>
 
-                  {/* <View style={styles.infoContainer}>
-                    <Text style={styles.label}>PAN:</Text>
+                  <View>
+                    <Text style={styles.label}>Description:</Text>
+                  </View>
 
-                    <TouchableOpacity
-                      style={{ flexDirection: "row", justifyContent: "center" }}
-                      onPress={() =>
-                        handleDownload(selectedItem?.documents[0]?.document)
-                      }
-                    >
-                      <FontAwesome
-                        name="file"
-                        size={18}
-                        color="#4169E1"
-                        style={{ marginRight: 5 }}
-                      />
-                    </TouchableOpacity>
-                  </View> */}
+                  <View style={styles.infoContainer}>
+                    {selectedItem ? (
+                      selectedItem?.complain_description !== "N/A" &&
+                      selectedItem?.complain_description ? (
+                        <View >
+                          <RenderHtml
+                            contentWidth={300}
+                            source={{
+                              html: selectedItem?.complain_description,
+                            }}
+                            tagsStyles={{
+                              p: { margin: 0, padding: 0, fontSize: 14 },  
+                            }}
+                            defaultTextProps={{ selectable: true }}
+                          />
+                        </View>
+                      ) : (
+                        <Text style={styles.value}>N/A</Text>
+                      )
+                    ) : null}
+                  </View>
 
-                  {/* Close Button */}
                   <TouchableOpacity
                     style={styles.closeButton}
                     onPress={() => setModalVisible(false)}
@@ -479,11 +467,11 @@ const VisitorRecordScreen = () => {
         >
           <Toast />
         </View>
- 
       </View>
     </>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -655,4 +643,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default VisitorRecordScreen;
+export default ChangeMemberScreen;

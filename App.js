@@ -5,8 +5,15 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import HomeNavigation from './App/Navigation/HomeNavigation';
 
+import { LogBox } from 'react-native';
 
+// Suppress the specific warning
+LogBox.ignoreLogs([
+  'Warning: TNodeChildrenRenderer: Support for defaultProps will be removed',
+]);
 
+// To suppress all warnings (not recommended for production)
+LogBox.ignoreAllLogs();
 
 
 // Drawer Navigator
