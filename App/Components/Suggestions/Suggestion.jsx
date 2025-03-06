@@ -5,12 +5,11 @@ import {
   Text,
   StyleSheet,
   Modal,
-  TextInput,
   Linking,
   TouchableOpacity,
 } from "react-native";
 
-import { DataTable, Button, IconButton } from "react-native-paper";
+import { DataTable, Button, IconButton, TextInput } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FontAwesome } from "@expo/vector-icons"; // Or use any other icon library
 import * as DocumentPicker from "expo-document-picker";
@@ -23,18 +22,19 @@ const Suggestion = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [suggestion, setSuggestion] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const rowsPerPage = 10;
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState(null);
-  // console.log("file",              text,file  )
+
   const showToast = (type, text1, text2) => {
     Toast.show({
-      type, // 'success', 'error', or 'info'
-      text1, // Main heading
-      text2, // Subtext
+      type,
+      text1,
+      text2,
       visibilityTime: 4000,
       position: "top",
     });
@@ -167,19 +167,19 @@ const Suggestion = () => {
     <>
       <View style={styles.container}>
         <View style={styles.header1}>
-          <Text style={styles.title}>WORKROOM</Text>
+          <Text style={styles.title}>Suggestion</Text>
           <View style={[styles.iconContainer, { backgroundColor: "#4169E1" }]}>
             <SuggestionCreate fetchSuggestions={fetchSuggestions} />
           </View>
         </View>
 
         {/* Search Input */}
-        <TextInput
+        {/* <TextInput
           style={styles.searchInput}
           placeholder="Search by Name, Contact, State, City"
           value={searchQuery}
           onChangeText={setSearchQuery}
-        />
+        /> */}
 
         {/* DataTable */}
         <DataTable>
@@ -217,7 +217,7 @@ const Suggestion = () => {
                       style={styles.iconButton}
                     />
                     <IconButton
-                      icon="pencil"
+                      icon="lead-pencil"
                       size={20}
                       onPress={() => handleEditClick(item)}
                       style={styles.iconButton}
@@ -268,6 +268,12 @@ const Suggestion = () => {
           {/* Dark Overlay */}
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Suggestion Details</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Icon name="times" size={24} color="#4169E1" />
+                </TouchableOpacity>
+              </View>
               {selectedItem && (
                 <>
                   <Text style={styles.modalTitle}>Tenant Details</Text>
@@ -296,11 +302,20 @@ const Suggestion = () => {
                   </View>
 
                   {/* Close Button */}
+                  {/* 
                   <TouchableOpacity
                     style={styles.closeButton}
                     onPress={() => setModalVisible(false)}
                   >
                     <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                   */}
+
+                  <TouchableOpacity
+                    style={styles.closeButtonView}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={styles.buttonText}>Close</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -315,7 +330,7 @@ const Suggestion = () => {
           animationType="slide"
           onRequestClose={() => setEditModalVisible(false)}
         >
-          <View style={styles.modalContainer}>
+          {/* <View style={styles.modalContainer}>
             <View style={styles.modalContentedit}>
               <Text style={styles.modalTitle}>Edit Suggestion</Text>
 
@@ -325,6 +340,12 @@ const Suggestion = () => {
                 value={text}
                 onChangeText={setText}
               />
+
+
+
+
+
+
 
               <TouchableOpacity style={styles.fileButton} onPress={pickFile}>
                 <Text style={styles.fileButtonText}>
@@ -344,6 +365,74 @@ const Suggestion = () => {
                   onPress={handleSubmit}
                 >
                   <Text style={styles.buttonText}>Submit</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View> */}
+
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Suggestion</Text>
+                <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+                  <Icon name="times" size={24} color="#4169E1" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.container2}>
+                <View style={styles.labelContainer2}>
+                  <Text style={styles.label2}>Enter Your Suggestion:</Text>
+                </View>
+                <TextInput
+                  placeholder="Enter Your Suggestion"
+                  placeholderTextColor="#808080"
+                  value={text}
+                  onChangeText={setText}
+                  mode="outlined"
+                  style={styles.input2}
+                  theme={{
+                    colors: {
+                      primary: "#4169E1",
+                      outline: "#808080",
+                    },
+                  }}
+                />
+                <View style={{ marginTop: 10 }}>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Select File:</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.fileButton}
+                    onPress={pickFile}
+                  >
+                    <Text style={styles.fileButtonText}>
+                      {file ? `Selected: ${file.name}` : "Pick a File"}
+                    </Text>
+                  </TouchableOpacity>
+                  <Text>Selcted File:- {fileName}</Text>
+                </View>
+              </View>
+
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={handleSubmit}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <>
+                      <Text style={styles.buttonText}>Submit</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setEditModalVisible(false)}
+                >
+                  <Text style={styles.buttonText}>Close</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -367,6 +456,45 @@ const Suggestion = () => {
 };
 
 const styles = StyleSheet.create({
+  container2: {
+    // padding: 15,
+    width: "100%",
+    maxWidth: 400,
+    alignSelf: "center",
+    marginBottom: 15,
+  },
+  labelContainer2: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  label2: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+    textAlign: "left",
+    color: "rgba(7, 7, 7, 0.47)",
+  },
+  input2: {
+    backgroundColor: "rgba(243, 238, 238, 0.47)",
+    width: "100%",
+    height: 50,
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    width: 350,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 15,
+    // width: "100%",
+    // position: "relative",
+  },
   container: {
     flex: 1,
     padding: 16,
@@ -419,7 +547,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // Dark transparent background
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -435,11 +563,9 @@ const styles = StyleSheet.create({
     elevation: 8, // Shadow for Android
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 15,
+    flex: 1,
   },
   infoContainer: {
     flexDirection: "row",
@@ -458,11 +584,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
   },
-  closeButton: {
+  closeButtonView: {
     marginTop: 20,
-    backgroundColor: "#007BFF",
+    backgroundColor: "red",
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: "center",
   },
   closeButtonText: {
@@ -471,32 +597,40 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   ////////////////////edit//////////
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)", // Semi-transparent background
+
+  ////////////////////////////////////////////////////////////////
+  container2: {
+    // padding: 15,
+    width: "100%",
+    maxWidth: 400,
+    alignSelf: "center",
+    marginBottom: 15,
   },
-  modalContentedit: {
-    backgroundColor: "white",
-    padding: 20,
-    width: 350,
-    borderRadius: 10,
+  labelContainer2: {
+    flexDirection: "row",
     alignItems: "center",
+    marginBottom: 5,
   },
+  label2: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+    textAlign: "left",
+    color: "rgba(7, 7, 7, 0.47)",
+  },
+  input2: {
+    backgroundColor: "rgba(243, 238, 238, 0.47)",
+    width: "100%",
+    height: 50,
+  },
+
+
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 15,
+    flex: 1,
   },
-  input: {
-    width: "100%",
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    marginBottom: 15,
-  },
+
   fileButton: {
     backgroundColor: "#28a745",
     padding: 10,
@@ -512,23 +646,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    marginBlock: 10,
+    marginBottom: 10,
   },
   submitButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#4169E1",
     padding: 10,
-    borderRadius: 5,
-    flex: 1,
-    alignItems: "center",
-    marginLeft: 5,
-  },
-  closeButtonedit: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
     flex: 1,
     alignItems: "center",
     marginRight: 5,
+  },
+  closeButton: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 10,
+    flex: 1,
+    alignItems: "center",
+    marginLeft: 5,
   },
   buttonText: {
     color: "white",

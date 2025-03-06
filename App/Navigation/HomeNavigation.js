@@ -20,6 +20,7 @@ import AmenityScreen from "../Components/Amenity/AmenityScreen";
 import ComplainScreen from "../Components/Complain/ComplainScreen";
 import NocScreen from "../Components/Noc/NocScreen";
 import LogoutScreen from "../Components/Logout/LogoutScreen";
+import Member from "../Components/Members/Member";
 
 const Drawer = createDrawerNavigator();
 const HomeNavigation = () => {
@@ -44,7 +45,7 @@ const HomeNavigation = () => {
         <Drawer.Screen name="Dashboard" component={DashboardScreen} />
         {/* <Stack.Screen name="Home" component={DashboardScreen} /> */}
         <Drawer.Screen name="Tenant" component={TenantScreen} />
-        <Drawer.Screen name="Members" component={MemberScreen} />
+        <Drawer.Screen name="Members" component={Member} />
         {/* <Drawer.Screen name="Notice" component={NoticeBoard} /> */}
         <Stack.Screen name="Suggestion" component={Suggestion} />
         <Drawer.Screen name="Login" component={LoginScreen} />

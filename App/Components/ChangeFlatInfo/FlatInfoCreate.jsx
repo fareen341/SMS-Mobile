@@ -6,14 +6,16 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Toast from "react-native-toast-message";
 import { WebView } from "react-native-webview";
 import axios from "axios";
 import { TextInput } from "react-native-paper";
+const { width } = Dimensions.get("window"); // Get screen width
 
-const CreateMemberInfo = ({ fetchVisitors }) => {
+const FlatInfoCreate = ({ fetchVisitors }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [visitorData, setVisitorData] = useState({
     title: "",
@@ -38,7 +40,7 @@ const CreateMemberInfo = ({ fetchVisitors }) => {
       formData.append("complain_description", visitorData.complain_description);
 
       const response = await axios.post(
-        "https://society.zacoinfotech.com/api/change_member_request/",
+        "https://society.zacoinfotech.com/api/flat_repair_request/",
         formData,
         {
           headers: {
@@ -83,7 +85,6 @@ const CreateMemberInfo = ({ fetchVisitors }) => {
     }
   };
 
-  // CKEditor HTML Content
   const htmlContent = `
   <html>
     <head>
@@ -97,6 +98,7 @@ const CreateMemberInfo = ({ fetchVisitors }) => {
     width: 100%;  
     max-width: 800px; 
     margin: 0 auto; 
+    border:"
 
   }
 
@@ -158,20 +160,18 @@ const CreateMemberInfo = ({ fetchVisitors }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Member Info</Text>
+              <Text style={styles.modalTitle}>Flat Info</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Icon name="times" size={24} color="#4169E1" />
               </TouchableOpacity>
             </View>
-        
-
             <View style={styles.container2}>
               <View style={styles.labelContainer2}>
                 <Text style={styles.label2}>Title:</Text>
               </View>
               <TextInput
                 placeholder="Enter Title"
-                value={visitorData.title}
+                placeholderTextColor="#808080"
                 onChangeText={(value) => handleChange("title", value)}
                 mode="outlined"
                 style={styles.input2}
@@ -183,17 +183,13 @@ const CreateMemberInfo = ({ fetchVisitors }) => {
                 }}
               />
             </View>
-
-            {/* WebView with CKEditor */}
-
             <View style={styles.container2}>
               <View style={styles.labelContainer2}>
                 <Text style={styles.label2}>
                   Write Your Complain in Detail:
                 </Text>
               </View>
-
-              <View style={{ height: 300, width: "100%" }}>
+              <View style={{ height: 180, width: "100%" }}>
                 <WebView
                   originWhitelist={["*"]}
                   value={visitorData.complain_description}
@@ -240,7 +236,7 @@ const CreateMemberInfo = ({ fetchVisitors }) => {
   );
 };
 
-export default CreateMemberInfo;
+export default FlatInfoCreate;
 
 const styles = StyleSheet.create({
   container2: {
@@ -267,6 +263,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 50,
   },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -281,32 +282,35 @@ const styles = StyleSheet.create({
     // width: "100%",
     // position: "relative",
   },
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  // modalContainer: {
+  //   flex: 1,
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  //   backgroundColor: "rgba(0,0,0,0.5)",
+  // },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: "#333",
+    textAlign: "left",
+    alignSelf: "flex-start",
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  input: {
-    width: "100%",
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    backgroundColor: "#f9f9f9",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginBottom: 15,
-  },
+  // input: {
+  //   width: "100%",
+  //   paddingVertical: 12,
+  //   paddingHorizontal: 15,
+  //   borderWidth: 1,
+  //   borderColor: "#ddd",
+  //   borderRadius: 8,
+  //   backgroundColor: "#f9f9f9",
+  //   shadowColor: "#000",
+  //   shadowOffset: { width: 0, height: 2 },
+  //   shadowOpacity: 0.1,
+  //   shadowRadius: 4,
+  //   elevation: 3,
+  //   marginBottom: 15,
+  // },
   modalContent: {
     backgroundColor: "white",
     padding: 20,
@@ -314,16 +318,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  // modalTitle: {
-  //   fontSize: 18,
-  //   fontWeight: "bold",
-  //   marginBottom: 15,
-  // },
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
     flex: 1,
   },
+
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -331,9 +331,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   submitButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#4169E1",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 5,
     flex: 1,
     alignItems: "center",
     marginLeft: 5,
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   closeButton: {
     backgroundColor: "red",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 5,
     flex: 1,
     alignItems: "center",
     marginLeft: 5,

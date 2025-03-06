@@ -214,9 +214,8 @@ const ChangeMemberScreen = () => {
     <>
       <View style={styles.container}>
         <View style={styles.header1}>
-          <Text style={styles.title}>WORKROOM</Text>
+          <Text style={styles.title}>Member Info</Text>
           <View style={[styles.iconContainer, { backgroundColor: "#4169E1" }]}>
-        
             <CreateMemberInfo fetchVisitors={fetchVisitors} />
           </View>
         </View>
@@ -246,7 +245,7 @@ const ChangeMemberScreen = () => {
 
             <DataTable.Title>
               <Text style={{ color: "#ffffff", fontWeight: "bold" }}>
-               Wing Flat
+                Wing Flat
               </Text>
             </DataTable.Title>
           </DataTable.Header>
@@ -298,8 +297,14 @@ const ChangeMemberScreen = () => {
           onRequestClose={() => setModalVisible(false)}
         >
           {/* Dark Overlay */}
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
+            <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                      <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Member Info</Text>
+                        <TouchableOpacity onPress={() => setModalVisible(false)}>
+                          <Icon name="times" size={24} color="#4169E1" />
+                        </TouchableOpacity>
+                      </View>
               {selectedItem && (
                 <>
                   <Text style={styles.modalTitle}>Visitor Details</Text>
@@ -349,14 +354,14 @@ const ChangeMemberScreen = () => {
                     {selectedItem ? (
                       selectedItem?.complain_description !== "N/A" &&
                       selectedItem?.complain_description ? (
-                        <View >
+                        <View>
                           <RenderHtml
                             contentWidth={300}
                             source={{
                               html: selectedItem?.complain_description,
                             }}
                             tagsStyles={{
-                              p: { margin: 0, padding: 0, fontSize: 14 },  
+                              p: { margin: 0, padding: 0, fontSize: 14 },
                             }}
                             defaultTextProps={{ selectable: true }}
                           />
@@ -472,8 +477,45 @@ const ChangeMemberScreen = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
+  container2: {
+    // padding: 15,
+    width: "100%",
+    maxWidth: 400,
+    alignSelf: "center",
+    marginBottom: 15,
+  },
+  labelContainer2: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  label2: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+    textAlign: "left",
+    color: "rgba(7, 7, 7, 0.47)",
+  },
+  input2: {
+    backgroundColor: "rgba(243, 238, 238, 0.47)",
+    width: "100%",
+    height: 50,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 15,
+    // width: "100%",
+    // position: "relative",
+  },
   container: {
     flex: 1,
     padding: 16,
@@ -541,12 +583,17 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 8, // Shadow for Android
   },
+  // modalTitle: {
+  //   fontSize: 22,
+  //   fontWeight: "bold",
+  //   textAlign: "center",
+  //   color: "#333",
+  //   marginBottom: 15,
+  // },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 15,
+    flex: 1,
   },
   infoContainer: {
     flexDirection: "row",
@@ -567,7 +614,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 20,
-    backgroundColor: "#007BFF",
+    backgroundColor: "red",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -591,11 +638,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
+  // modalTitle: {
+  //   fontSize: 18,
+  //   fontWeight: "bold",
+  //   marginBottom: 15,
+  // },
   input: {
     width: "100%",
     padding: 10,

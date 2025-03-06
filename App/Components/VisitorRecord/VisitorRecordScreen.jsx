@@ -5,13 +5,12 @@ import {
   Text,
   StyleSheet,
   Modal,
-  TextInput,
   Linking,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 
-import { DataTable, Button, IconButton } from "react-native-paper";
+import { DataTable, Button, IconButton, TextInput } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FontAwesome } from "@expo/vector-icons"; // Or use any other icon library
 import * as DocumentPicker from "expo-document-picker";
@@ -59,12 +58,10 @@ const VisitorRecordScreen = () => {
       item.additional_note,
       item.visitor_id,
       item.wing_flat_display,
-    ]
-      .some((field) =>
-        (field?.toLowerCase() || "").includes(searchQuery.toLowerCase())
-      )
+    ].some((field) =>
+      (field?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+    )
   );
-  
 
   const handleViewClick = (item) => {
     setSelectedItem(item);
@@ -186,7 +183,7 @@ const VisitorRecordScreen = () => {
           },
         }
       );
-    
+
       if (response.status === 200 || response.status === 201) {
         setEditModalVisible(false); // Modal band karna
         showToast("success", "🎉 Success!", "Visitor updated successfully.");
@@ -201,7 +198,10 @@ const VisitorRecordScreen = () => {
         fetchVisitors(); // Data update karna
       }
     } catch (error) {
-      console.error("Error submitting visitor:", error.response?.data || error.message);
+      console.error(
+        "Error submitting visitor:",
+        error.response?.data || error.message
+      );
       showToast("error", "⚠️ Submission Failed", "Something went wrong!");
     } finally {
       setLoading(false);
@@ -212,7 +212,7 @@ const VisitorRecordScreen = () => {
     <>
       <View style={styles.container}>
         <View style={styles.header1}>
-          <Text style={styles.title}>WORKROOM</Text>
+          <Text style={styles.title}>Visitor</Text>
           <View style={[styles.iconContainer, { backgroundColor: "#4169E1" }]}>
             <VisitorCreation fetchVisitors={fetchVisitors} />
           </View>
@@ -223,6 +223,7 @@ const VisitorRecordScreen = () => {
           style={styles.searchInput}
           placeholder="Search by Name, Contact, State, City"
           value={searchQuery}
+          placeholderTextColor="#808080"
           onChangeText={setSearchQuery}
         />
 
@@ -264,7 +265,7 @@ const VisitorRecordScreen = () => {
                       style={styles.iconButton}
                     />
                     <IconButton
-                      icon="pencil"
+                      icon="lead-pencil"
                       size={20}
                       onPress={() => handleEditClick(item)}
                       style={styles.iconButton}
@@ -300,6 +301,12 @@ const VisitorRecordScreen = () => {
           {/* Dark Overlay */}
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Visitor</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Icon name="times" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
               {selectedItem && (
                 <>
                   <Text style={styles.modalTitle}>Visitor Details</Text>
@@ -398,46 +405,118 @@ const VisitorRecordScreen = () => {
           animationType="slide"
           onRequestClose={() => setEditModalVisible(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContentedit}>
-              <Text style={styles.modalTitle}>Update Visitor</Text>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Visitor</Text>
+                <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+                  <Icon name="times" size={24} color="#cc1919" />
+                </TouchableOpacity>
+              </View>
+              {/* <Text style={styles.modalTitle}>Update Visitor</Text> */}
 
-              <TextInput
-                placeholder="Full Name"
-                value={visitorData.full_name}
-                style={styles.input}
-                onChangeText={(value) => handleChange("full_name", value)}
-              />
-
-              <TextInput
-                placeholder="Contact No"
-                value={visitorData.contact_no}
-                keyboardType="phone-pad"
-                style={styles.input}
-                onChangeText={(value) => handleChange("contact_no", value)}
-              />
-
-              <TextInput
-                placeholder="Email"
-                value={visitorData.email}
-                keyboardType="email-address"
-                style={styles.input}
-                onChangeText={(value) => handleChange("email", value)}
-              />
-
-              <TextInput
-                placeholder="Visit Purpose"
-                value={visitorData.visit_purpose}
-                style={styles.input}
-                onChangeText={(value) => handleChange("visit_purpose", value)}
-              />
-
-              <TextInput
-                placeholder="Additional Note"
-                value={visitorData.additional_note}
-                style={styles.input}
-                onChangeText={(value) => handleChange("additional_note", value)}
-              />
+              <View style={styles.container2}>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Enter Your Full Name:</Text>
+                  </View>
+                  <TextInput
+                    placeholder="Full Name"
+                    placeholderTextColor="#808080"
+                    value={visitorData.full_name}
+                    onChangeText={(value) => handleChange("full_name", value)}
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Contact No:</Text>
+                  </View>
+                  <TextInput
+                    placeholder="Contact No"
+                    placeholderTextColor="#808080"
+                    value={visitorData.contact_no}
+                    onChangeText={(value) => handleChange("contact_no", value)}
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Enter Your Email:</Text>
+                  </View>
+                  <TextInput
+                    placeholderTextColor="#808080"
+                    keyboardType="email-address"
+                    placeholder="Email"
+                    value={visitorData.email}
+                    onChangeText={(value) => handleChange("email", value)}
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Visit Purpose:</Text>
+                  </View>
+                  <TextInput
+                    placeholderTextColor="#808080"
+                    placeholder="Visit Purpose"
+                    value={visitorData.visit_purpose}
+                    onChangeText={(value) =>
+                      handleChange("visit_purpose", value)
+                    }
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Additional Note:</Text>
+                  </View>
+                  <TextInput
+                    placeholderTextColor="#808080"
+                    placeholder="Additional Note"
+                    value={visitorData.additional_note}
+                    onChangeText={(value) =>
+                      handleChange("additional_note", value)
+                    }
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+              </View>
 
               <TouchableOpacity style={styles.fileButton} onPress={pickFile}>
                 <Text style={styles.fileButtonText}>
@@ -479,13 +558,63 @@ const VisitorRecordScreen = () => {
         >
           <Toast />
         </View>
- 
       </View>
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  container2: {
+    // padding: 15,
+    width: "100%",
+    maxWidth: 400,
+    alignSelf: "center",
+    marginBottom: 15,
+  },
+  labelContainer2: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBlock: 5,
+  },
+  label2: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+    textAlign: "left",
+    color: "rgba(7, 7, 7, 0.47)",
+  },
+  input2: {
+    backgroundColor: "rgba(243, 238, 238, 0.47)",
+    width: "100%",
+    height: 50,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 15,
+    // width: "100%",
+    // position: "relative",
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    flex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    width: 350,
+    borderRadius: 10,
+    alignItems: "center",
+  },
   container: {
     flex: 1,
     padding: 16,
@@ -498,6 +627,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
     paddingLeft: 8,
+    backgroundColor: "rgba(243, 238, 238, 0.47)",
   },
   header: {
     backgroundColor: "#4169E1",
@@ -523,8 +653,8 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
+    width: 45,
+    height: 45,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
@@ -553,13 +683,13 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 8, // Shadow for Android
   },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 15,
-  },
+  // modalTitle: {
+  //   fontSize: 22,
+  //   fontWeight: "bold",
+  //   textAlign: "center",
+  //   color: "#333",
+  //   marginBottom: 15,
+  // },
   infoContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -579,7 +709,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 20,
-    backgroundColor: "#007BFF",
+    backgroundColor: "red",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -603,11 +733,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
+  // modalTitle: {
+  //   fontSize: 18,
+  //   fontWeight: "bold",
+  //   marginBottom: 15,
+  // },
   input: {
     width: "100%",
     padding: 10,

@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
-  TextInput,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
 import Toast from "react-native-toast-message";
+import { TextInput } from "react-native-paper";
 
 const VisitorCreation = ({ fetchVisitors }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -74,14 +74,14 @@ const VisitorCreation = ({ fetchVisitors }) => {
       );
       return;
     }
-  
+
     setLoading(true);
-  
+
     const formData = new FormData();
     for (const key in visitorData) {
       formData.append(key, visitorData[key]);
     }
-  
+
     if (file) {
       formData.append("visitor_photo", {
         uri: file.uri,
@@ -89,10 +89,10 @@ const VisitorCreation = ({ fetchVisitors }) => {
         type: file.mimeType || "image/jpeg", // Default to image/jpeg
       });
     }
-  
+
     try {
       // console.log("Submitting FormData:", formData);
-  
+
       const response = await axios.post(
         "https://society.zacoinfotech.com/api/visitor_records/",
         formData,
@@ -104,7 +104,7 @@ const VisitorCreation = ({ fetchVisitors }) => {
           transformRequest: (data) => data, // Ensures FormData is sent correctly
         }
       );
-  
+
       if (response.status === 201) {
         showToast("success", "🎉 Success!", "Visitor created successfully.");
         setModalVisible(false);
@@ -128,7 +128,6 @@ const VisitorCreation = ({ fetchVisitors }) => {
       setLoading(false);
     }
   };
-  
 
   return (
     <>
@@ -147,46 +146,117 @@ const VisitorCreation = ({ fetchVisitors }) => {
           animationType="slide"
           onRequestClose={() => setModalVisible(false)}
         >
-          <View style={styles.modalContainer}>
+          <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Create Visitor</Text>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Visitor</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Icon name="times" size={24} color="#4169E1" />
+                </TouchableOpacity>
+              </View>
 
-              <TextInput
-                placeholder="Full Name"
-                value={visitorData.full_name}
-                style={styles.input}
-                onChangeText={(value) => handleChange("full_name", value)}
-              />
-
-              <TextInput
-                placeholder="Contact No"
-                value={visitorData.contact_no}
-                keyboardType="phone-pad"
-                style={styles.input}
-                onChangeText={(value) => handleChange("contact_no", value)}
-              />
-
-              <TextInput
-                placeholder="Email"
-                value={visitorData.email}
-                keyboardType="email-address"
-                style={styles.input}
-                onChangeText={(value) => handleChange("email", value)}
-              />
-
-              <TextInput
-                placeholder="Visit Purpose"
-                value={visitorData.visit_purpose}
-                style={styles.input}
-                onChangeText={(value) => handleChange("visit_purpose", value)}
-              />
-
-              <TextInput
-                placeholder="Additional Note"
-                value={visitorData.additional_note}
-                style={styles.input}
-                onChangeText={(value) => handleChange("additional_note", value)}
-              />
+              <View style={styles.container2}>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Enter Your Full Name:</Text>
+                  </View>
+                  <TextInput
+                    placeholder="Full Name"
+                    placeholderTextColor="#808080"
+                    value={visitorData.full_name}
+                    onChangeText={(value) => handleChange("full_name", value)}
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Contact No:</Text>
+                  </View>
+                  <TextInput
+                    placeholder="Contact No"
+                    placeholderTextColor="#808080"
+                    value={visitorData.contact_no}
+                    onChangeText={(value) => handleChange("contact_no", value)}
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Enter Your Email:</Text>
+                  </View>
+                  <TextInput
+                    placeholderTextColor="#808080"
+                    keyboardType="email-address"
+                    placeholder="Email"
+                    value={visitorData.email}
+                    onChangeText={(value) => handleChange("email", value)}
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Visit Purpose:</Text>
+                  </View>
+                  <TextInput
+                    placeholderTextColor="#808080"
+                    placeholder="Visit Purpose"
+                    value={visitorData.visit_purpose}
+                    onChangeText={(value) =>
+                      handleChange("visit_purpose", value)
+                    }
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>Additional Note:</Text>
+                  </View>
+                  <TextInput
+                    placeholderTextColor="#808080"
+                    placeholder="Additional Note"
+                    value={visitorData.additional_note}
+                    onChangeText={(value) =>
+                      handleChange("additional_note", value)
+                    }
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+              </View>
 
               <TouchableOpacity style={styles.fileButton} onPress={pickFile}>
                 <Text style={styles.fileButtonText}>
@@ -224,16 +294,55 @@ const VisitorCreation = ({ fetchVisitors }) => {
 export default VisitorCreation;
 
 const styles = StyleSheet.create({
+  container2: {
+    // padding: 15,
+    width: "100%",
+    maxWidth: 400,
+    alignSelf: "center",
+    marginBottom: 15,
+  },
+  labelContainer2: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBlock: 5,
+  },
+  label2: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+    textAlign: "left",
+    color: "rgba(7, 7, 7, 0.47)",
+  },
+  input2: {
+    backgroundColor: "rgba(243, 238, 238, 0.47)",
+    width: "100%",
+    height: 50,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 15,
+    // width: "100%",
+    // position: "relative",
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  modalContainer: {
+  
+  modalOverlay: {
     flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
     backgroundColor: "white",
@@ -242,19 +351,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-  input: {
-    width: "100%",
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    marginBottom: 15,
-  },
+
+
   fileButton: {
     backgroundColor: "#28a745",
     padding: 10,
@@ -275,7 +373,7 @@ const styles = StyleSheet.create({
   submitButton: {
     backgroundColor: "#007bff",
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
     flex: 1,
     alignItems: "center",
     marginLeft: 5,
@@ -283,7 +381,7 @@ const styles = StyleSheet.create({
   closeButton: {
     backgroundColor: "red",
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
     flex: 1,
     alignItems: "center",
     marginLeft: 5,
