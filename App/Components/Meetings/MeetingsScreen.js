@@ -239,7 +239,7 @@ const MeetingsScreen = () => {
                       </Text>
                     </View>
 
-                    <View style={styles.content}>
+                    {/* <View style={styles.content}>
                       <Text style={styles.label}>Meeting :</Text>
                       {selectedItem?.content ? (
                         <WebView
@@ -249,7 +249,7 @@ const MeetingsScreen = () => {
                       ) : (
                         <Text style={styles.value}>N/A</Text>
                       )}
-                    </View>
+                    </View> */}
                   </View>
                 ) : (
                   <>
@@ -289,7 +289,7 @@ const MeetingsScreen = () => {
                     </Text>
                   </View>
                 
-                  <View style={styles.content}>
+                  {/* <View style={styles.content}>
                     <Text style={styles.label}>Minutes:</Text>
                     {selectedItem?.minutes_content &&
                     typeof selectedItem.minutes_content === "string" &&
@@ -298,7 +298,7 @@ const MeetingsScreen = () => {
                     ) : (
                       <Text style={styles.value}>N/A</Text>
                     )}
-                  </View>
+                  </View> */}
                 </>
                 
                 )}
