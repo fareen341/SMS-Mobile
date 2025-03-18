@@ -101,7 +101,7 @@ const OfficeBearerScreen = () => {
     // </View>
     <View style={styles.container}>
       <View style={styles.header1}>
-        <Text style={styles.title}>House Help</Text>
+        <Text style={styles.title}>Office Bearer</Text>
       </View>
 
       {/* Search Input */}

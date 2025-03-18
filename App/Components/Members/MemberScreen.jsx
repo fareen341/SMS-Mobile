@@ -234,6 +234,10 @@ const MemberScreen = () => {
           )}
         </View>
       ))}
+
+
+
+      
     </ScrollView>
   );
 };

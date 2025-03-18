@@ -5,51 +5,67 @@ import {
   Text,
   StyleSheet,
   Modal,
-  TextInput,
-  ScrollView,
+  Linking,
   TouchableOpacity,
+  ActivityIndicator,
+  ScrollView,
 } from "react-native";
-import { DataTable, Button, IconButton } from "react-native-paper";
-import FlashMessage, { showMessage } from "react-native-flash-message";
+
+import { DataTable, Button, IconButton, TextInput } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { FontAwesome } from "@expo/vector-icons"; // Or use any other icon library
+import * as DocumentPicker from "expo-document-picker";
+import Toast from "react-native-toast-message";
+import ComplainCreation from "./ComplainCreation";
+// import VisitorCreation from "./VisitorCreation";
 
 const ComplainScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [messageModalVisible, setMessageModalVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [addComplainModalVisible, setAddComplainModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [complains, setComplains] = useState([]);
+  const [visitors, setVisitors] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
-  const [messageText, setMessageText] = useState("");
-  const [newComplainTitle, setNewComplainTitle] = useState("");
-  const [newComplainMessage, setNewComplainMessage] = useState("");
   const rowsPerPage = 10;
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [text, setText] = useState("");
+  const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState(null);
+  // console.log("file",             visitors )
 
-  useEffect(() => {
-    if (addComplainModalVisible) {
-      setNewComplainTitle(""); // Clear title
-      setNewComplainMessage(""); // Clear message
-    }
-
+  const fetchVisitors = () => {
     axios
       .get("https://society.zacoinfotech.com/api/complain/", {
         headers: {
           Authorization: `Token e0ba9a7bd3574f04d91315f4452deaa6262880df`,
         },
       })
-      .then((response) => setComplains(response.data))
-      .catch((error) => console.error("Error fetching data:", error));
-  }, [addComplainModalVisible]);
+      .then((response) => {
+        setVisitors(response?.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
 
-  const filteredData = complains.filter(
-    (item) =>
-      (typeof item.name === "string" &&
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (typeof item.title === "string" &&
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()))
+  useEffect(() => {
+    fetchVisitors(); // Call API when parent mounts
+  }, []);
+
+  const filteredData = visitors.filter((item) =>
+    [
+      item.wing_flat_name,
+      item.owner_name,
+      item.owner_email,
+      item.owner_contact,
+      item.title,
+      item.complain_description,
+      item.status,
+      item.name,
+    ].some((field) =>
+      (field?.toString().toLowerCase() || "").includes(
+        searchQuery.toLowerCase()
+      )
+    )
   );
 
   const handleViewClick = (item) => {
@@ -59,559 +75,373 @@ const ComplainScreen = () => {
 
   const handleEditClick = (item) => {
     setSelectedItem(item);
+// console.log("item",item)
+    // Populate visitorData with existing values
+    setVisitorData({
+      title: item.title || "",
+      complain_description: item.complain_description || "",
+     
+    });
+
+
     setEditModalVisible(true);
   };
 
-  const handleAddMessageClick = (item) => {
-    setSelectedItem(item);
-    setMessageModalVisible(true);
+  const handleDownload = (fileUrl) => {
+    Linking.openURL(fileUrl);
   };
 
-  const handleAddComplain = () => {
-    setAddComplainModalVisible(true);
+  const [visitorData, setVisitorData] = useState({
+    title: "",
+    complain_description: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  // Handle input change
+  const handleChange = (key, value) => {
+    setVisitorData((prevState) => ({
+      ...prevState,
+      [key]: value,
+    }));
   };
 
-  const handleComplainSubmit = () => {
-    const complainData = {
-      title: newComplainTitle,
-      complain_description: newComplainMessage,
-    };
-
-    axios
-      .post("https://society.zacoinfotech.com/api/complain/", complainData, {
-        headers: {
-          Authorization: `Token e0ba9a7bd3574f04d91315f4452deaa6262880df`,
-        },
-      })
-      .then((response) => {
-        const newComplain = response.data;
-        showMessage({
-          message: "Complain Submitted!",
-          type: "success",
-        });
-        setAddComplainModalVisible(false);
-        // setComplains(prevComplains => [
-        //   ...prevComplains,
-        //   { title: newComplainTitle, complain_description: newComplainMessage }
-        // ]);
-        setComplains((prevComplains) => [
-          ...prevComplains,
-          { ...newComplain }, // Spread the response object to dynamically include all properties
-        ]);
-      })
-      .catch((error) => {
-        setAddComplainModalVisible(false);
-        if (error.response) {
-          const errorData = error.response.data;
-
-          // If we have field-specific errors
-          if (errorData) {
-            let errorMessage = "";
-            Object.keys(errorData).forEach((key) => {
-              const fieldErrors = errorData[key];
-              errorMessage += `${key}: ${fieldErrors.join(", ")}\n`;
-            });
-
-            showMessage({
-              message: errorMessage || "Something went wrong!",
-              type: "danger",
-            });
-          } else {
-            // If no specific field error is available, fallback to a general error message
-            showMessage({
-              message: error.response.data?.message || "Something went wrong!",
-              type: "danger",
-            });
-          }
-        } else if (error.request) {
-          // No response from server
-          showMessage({
-            message: "No response from server. Please check your connection.",
-            type: "danger",
-          });
-        } else {
-          // Any other errors
-          showMessage({
-            message: error.message || "An unknown error occurred.",
-            type: "danger",
-          });
-        }
-      });
+  // Function to show Toast messages
+  const showToast = (type, text1, text2) => {
+    Toast.show({
+      type,
+      text1,
+      text2,
+      visibilityTime: 4000,
+      position: "top",
+    });
   };
 
-  const handleComplainEditSubmit = () => {
-    const updatedComplainData = {
-      title: selectedItem.title,
-      complain_description: selectedItem.complain_description,
-    };
+  // Function to Submit Data
+  const handleSubmit = async () => {
+    if (!visitorData.title || !visitorData.complain_description) {
+      showToast(
+        "error",
+        "❌ Submission Failed",
+        "Please fill all required fields!"
+      );
+      return;
+    }
 
-    axios
-      .patch(
+    setLoading(true);
+
+    const formData = new FormData();
+    for (const key in visitorData) {
+      formData.append(key, visitorData[key]);
+    }
+
+
+
+    try {
+      const response = await axios.patch(
         `https://society.zacoinfotech.com/api/complain/${selectedItem.id}/`,
-        updatedComplainData,
+        formData,
         {
           headers: {
+            "Content-Type": "multipart/form-data",
             Authorization: `Token e0ba9a7bd3574f04d91315f4452deaa6262880df`,
           },
         }
-      )
-      .then((response) => {
-        showMessage({
-          message: "Complain Updated!",
-          type: "success",
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        setEditModalVisible(false); // Modal band karna
+        showToast("success", "🎉 Success!", "Complain updated successfully.");
+        setVisitorData({
+          title: "",
+          complain_description: "",
         });
-
-        // Update the complains array with the updated data
-        setComplains((prevComplains) =>
-          prevComplains.map((complain) =>
-            complain.id === selectedItem.id
-              ? { ...complain, ...response.data }
-              : complain
-          )
-        );
-
-        setEditModalVisible(false);
-      })
-      .catch((error) => {
-        setEditModalVisible(false);
-        // If error has a response
-        if (error.response) {
-          const errorData = error.response.data;
-
-          // If we have field-specific errors
-          if (errorData) {
-            let errorMessage = "";
-            Object.keys(errorData).forEach((key) => {
-              const fieldErrors = errorData[key];
-              errorMessage += `${key}: ${fieldErrors.join(", ")}\n`;
-            });
-
-            showMessage({
-              message: errorMessage || "Something went wrong!",
-              type: "danger",
-            });
-          } else {
-            // If no specific field error is available, fallback to a general error message
-            showMessage({
-              message: error.response.data?.message || "Something went wrong!",
-              type: "danger",
-            });
-          }
-        } else if (error.request) {
-          // No response from server
-          showMessage({
-            message: "No response from server. Please check your connection.",
-            type: "danger",
-          });
-        } else {
-          // Any other errors
-          showMessage({
-            message: error.message || "An unknown error occurred.",
-            type: "danger",
-          });
-        }
-      });
+        setFile(null);
+        fetchVisitors(); // Data update karna
+      }
+    } catch (error) {
+      console.error(
+        "Error submitting visitor:",
+        error.response?.data || error.message
+      );
+      showToast("error", "⚠️ Submission Failed", "Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      {/* Suggestions Text & Add Complain Button */}
-      <View style={styles.headerRow}>
-        <Text style={styles.suggestionsText}>Complains</Text>
-        <Button mode="contained" onPress={handleAddComplain}>
-          Add Complain
-        </Button>
-      </View>
-
-      <View style={styles.header1}>
-        <Text style={styles.title1}>Member Info</Text>
-        <View style={[styles.iconContainer1, { backgroundColor: "#4169E1" }]}>
-          {/* <CreateMemberInfo fetchVisitors={fetchVisitors} /> */}
-          <View>
-            <TouchableOpacity style={styles.button} onPress={handleAddComplain}>
-              <Icon name="plus-circle" size={24} color="#fff" />
-            </TouchableOpacity>
+    <>
+      <View style={styles.container}>
+        {/* <View style={styles.header1}>
+          <Text style={styles.title}>Complain</Text>
+          <View style={[styles.iconContainer, { backgroundColor: "#4169E1" }]}>
+            <VisitorCreation fetchVisitors={fetchVisitors} />
           </View>
-        </View>
-      </View>
+        </View> */}
+        <ComplainCreation fetchVisitors={fetchVisitors} />
 
-      {/* Search Input */}
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search by Name, Title"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
+        {/* Search Input */}
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by Name, Contact, State, City"
+          value={searchQuery}
+          placeholderTextColor="#808080"
+          onChangeText={setSearchQuery}
+        />
 
-      {/* Data Table */}
-      <DataTable>
-        <DataTable.Header style={styles.header}>
-          <DataTable.Title style={styles.actionColumn}>
-            <Text style={styles.headerTitle}>Actions</Text>
-          </DataTable.Title>
-          <DataTable.Title>
-            <Text style={styles.headerTitle}>Title</Text>
-          </DataTable.Title>
-          <DataTable.Title>
-            <Text style={styles.headerTitle}>Description</Text>
-          </DataTable.Title>
-        </DataTable.Header>
+        {/* DataTable */}
+        <DataTable>
+          {/* Table Header */}
+          <DataTable.Header style={styles.header}>
+            <DataTable.Title style={styles.actionColumn}>
+              <Text style={{ color: "#ffffff", fontWeight: "bold" }}>
+                Actions
+              </Text>
+            </DataTable.Title>
+            <DataTable.Title>
+              <Text style={{ color: "#ffffff", fontWeight: "bold" }}>Name</Text>
+            </DataTable.Title>
+            <DataTable.Title>
+              <Text style={{ color: "#ffffff", fontWeight: "bold" }}>
+                Title
+              </Text>
+            </DataTable.Title>
+            {/* <DataTable.Title>
+              <Text style={{ color: "#ffffff", fontWeight: "bold" }}>
+                Contact
+              </Text>
+            </DataTable.Title> */}
+          </DataTable.Header>
 
-        {filteredData
-          .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
-          .map((item) => (
-            <DataTable.Row key={item.id}>
-              <DataTable.Cell>
-                <View style={styles.iconContainer}>
-                  <IconButton
-                    icon="eye"
-                    size={20}
-                    onPress={() => handleViewClick(item)}
-                    style={styles.iconButton}
-                  />
-                  <IconButton
-                    icon="lead-pencil"
-                    size={20}
-                    onPress={() => handleEditClick(item)}
-                    style={styles.iconButton}
-                  />
-                  <IconButton
-                    icon="plus-thick"
-                    size={20}
-                    onPress={() => handleAddMessageClick(item)}
-                    style={styles.iconButton}
+          {/* Table Rows */}
+          {filteredData
+            .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+            .map((item) => (
+              <DataTable.Row key={item.id}>
+                <DataTable.Cell style={styles.actionColumn}>
+                  <View style={styles.iconContainer1}>
+                    <IconButton
+                      icon="eye"
+                      size={20}
+                      onPress={() => handleViewClick(item)}
+                      style={styles.iconButton}
+                    />
+                    <IconButton
+                      icon="lead-pencil"
+                      size={20}
+                      onPress={() => handleEditClick(item)}
+                      style={styles.iconButton}
+                    />
+                  </View>
+                </DataTable.Cell>
+
+                <DataTable.Cell>{item.owner_name}</DataTable.Cell>
+                <DataTable.Cell>{item.title}</DataTable.Cell>
+                {/* <DataTable.Cell>{item.complain_description}</DataTable.Cell> */}
+              </DataTable.Row>
+            ))}
+
+          {/* Pagination Controls */}
+          <DataTable.Pagination
+            page={page}
+            numberOfPages={Math.ceil(filteredData.length / rowsPerPage)}
+            onPageChange={(newPage) => setPage(newPage)}
+            label={`${page * rowsPerPage + 1}-${Math.min(
+              (page + 1) * rowsPerPage,
+              filteredData.length
+            )} of ${filteredData.length}`}
+          />
+        </DataTable>
+
+        {/* Modal for Visitor Details */}
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          {/* Dark Overlay */}
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Complain</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Icon name="times" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
+              {selectedItem && (
+                <>
+                  <Text style={styles.modalTitle}>Complain Details</Text>
+
+                  <ScrollView style={{ maxHeight: 400 }}>
+                    <View style={styles.infoContainer}>
+                      <Text style={styles.label}>Wing & Flat:</Text>
+                      <Text style={styles.value}>
+                        {selectedItem?.wing_flat_name || "N/A"}
+                      </Text>
+                    </View>
+
+                    <View style={styles.infoContainer}>
+                      <Text style={styles.label}>Owner Name:</Text>
+                      <Text style={styles.value}>
+                        {selectedItem?.owner_name || "N/A"}
+                      </Text>
+                    </View>
+
+                    <View style={styles.infoContainer}>
+                      <Text style={styles.label}>Owner Email:</Text>
+                      <Text style={styles.value}>
+                        {selectedItem?.owner_email || "N/A"}
+                      </Text>
+                    </View>
+
+                    <View style={styles.infoContainer}>
+                      <Text style={styles.label}>Owner Contact:</Text>
+                      <Text style={styles.value}>
+                        {selectedItem?.owner_contact || "N/A"}
+                      </Text>
+                    </View>
+
+                    <View style={styles.infoContainer}>
+                      <Text style={styles.label}>Title:</Text>
+                      <Text style={styles.value}>
+                        {selectedItem?.title || "N/A"}
+                      </Text>
+                    </View>
+
+                    <View style={styles.infoContainer}>
+                      <Text style={styles.label}>Complain Description:</Text>
+                      <Text style={styles.value}>
+                        {selectedItem?.complain_description || "N/A"}
+                      </Text>
+                    </View>
+
+                    <View style={styles.infoContainer}>
+                      <Text style={styles.label}>Status:</Text>
+                      <Text style={styles.value}>
+                        {selectedItem?.status || "N/A"}
+                      </Text>
+                    </View>
+                  </ScrollView>
+
+                  {/* Close Button */}
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </View>
+        </Modal>
+
+        {/* ////////Edit Modal/// */}
+        <Modal
+          visible={editModalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setEditModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Complain</Text>
+                <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+                  <Icon name="times" size={24} color="#cc1919" />
+                </TouchableOpacity>
+              </View>
+              {/* <Text style={styles.modalTitle}>Update Visitor</Text> */}
+
+              <View style={styles.container2}>
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>
+                      Nature of Complain in Short:
+                    </Text>
+                  </View>
+                  <TextInput
+                    placeholder="Nature of Complain in Short"
+                    placeholderTextColor="#808080"
+                    value={visitorData.title}
+                    onChangeText={(value) => handleChange("title", value)}
+                    mode="outlined"
+                    style={styles.input2}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
                   />
                 </View>
-              </DataTable.Cell>
-              {/* <DataTable.Cell>{item.name}</DataTable.Cell> */}
-              <DataTable.Cell>{item.title}</DataTable.Cell>
-              <DataTable.Cell>{item.complain_description}</DataTable.Cell>
-            </DataTable.Row>
-          ))}
+                <View>
+                  <View style={styles.labelContainer2}>
+                    <Text style={styles.label2}>
+                      Write Your Complaint in Details:
+                    </Text>
+                  </View>
+                  <TextInput
+                    placeholder="Write Your Complaint in Details"
+                    placeholderTextColor="#808080"
+                    value={visitorData.complain_description}
+                    onChangeText={(value) =>
+                      handleChange("complain_description", value)
+                    }
+                    mode="outlined"
+                    style={[
+                      styles.input2,
+                      { height: 120, textAlignVertical: "top" },
+                    ]}
+                    multiline={true}
+                    numberOfLines={4}
+                    theme={{
+                      colors: {
+                        primary: "#4169E1",
+                        outline: "#808080",
+                      },
+                    }}
+                  />
+                </View>
+              </View>
 
-        <DataTable.Pagination
-          page={page}
-          numberOfPages={Math.ceil(filteredData.length / rowsPerPage)}
-          onPageChange={(newPage) => setPage(newPage)}
-          label={`${page * rowsPerPage + 1}-${Math.min(
-            (page + 1) * rowsPerPage,
-            filteredData.length
-          )} of ${filteredData.length}`}
-        />
-      </DataTable>
-
-      {/* View Modal */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContentForView}>
-            {/* Header with Title on the left and Close Icon on the right */}
-            <View style={styles.modalHeaderForView}>
-              <Text style={styles.modalTitle}>Complain</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Icon name="times" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
-            {selectedItem && (
-              <>
-                <Text style={styles.detailText}>
-                  <Text style={[styles.label, { fontWeight: "bold" }]}>
-                    Title:
-                  </Text>{" "}
-                  {selectedItem.title}
-                </Text>
-                <Text style={styles.detailText}>
-                  <Text style={[styles.label, { fontWeight: "bold" }]}>
-                    Description:
-                  </Text>{" "}
-                  {selectedItem.complain_description}
-                </Text>
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
-
-      {/* Edit Complain Modal */}
-      <Modal
-        visible={editModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setEditModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {/* Header with Title and Close Icon */}
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Edit Complain</Text>
-              <TouchableOpacity onPress={() => setEditModalVisible(false)}>
-                <Icon name="times" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
-
-            <TextInput
-              style={styles.textArea1}
-              placeholder="Title"
-              value={selectedItem?.title}
-              onChangeText={(text) =>
-                setSelectedItem({ ...selectedItem, title: text })
-              }
-            />
-            <TextInput
-              style={styles.textArea1}
-              placeholder="Complain Details"
-              multiline
-              value={selectedItem?.complain_description}
-              onChangeText={(text) =>
-                setSelectedItem({ ...selectedItem, complain_description: text })
-              }
-            />
-
-            {/* Buttons Side by Side */}
-            <View style={styles.buttonContainer}>
-              <Button
-                mode="contained"
-                compact
-                onPress={handleComplainEditSubmit}
-                style={styles.button}
-              >
-                Save
-              </Button>
-              <Button
-                mode="outlined"
-                compact
-                onPress={() => setEditModalVisible(false)}
-                style={styles.button}
-              >
-                Close
-              </Button>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={styles.closeButtonedit}
+                  onPress={() => setEditModalVisible(false)}
+                >
+                  <Text style={styles.buttonText}>Close</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.submitButton}
+                  onPress={handleSubmit}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.buttonText}>Submit</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
+        </Modal>
+
+        <View
+          style={{
+            position: "absolute",
+            top: 50,
+            left: 0,
+            right: 0,
+            zIndex: 900,
+          }}
+        >
+          <Toast />
         </View>
-      </Modal>
-
-      {/* WhatsApp-Style Chat Modal */}
-      <Modal
-        visible={messageModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setMessageModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.chatContainer}>
-            {/* Chat Header */}
-            <View style={styles.chatHeader}>
-              <Text style={styles.chatTitle}>Chat</Text>
-            </View>
-
-            {/* Chat Messages - Scrollable */}
-            <ScrollView style={styles.chatBody}>
-              <View style={styles.receivedMessage}>
-                <Text style={styles.messageText}>
-                  Hello! How can I help you?
-                </Text>
-              </View>
-              <View style={styles.sentMessage}>
-                <Text style={styles.messageText}>
-                  I need some information about the NOC process.
-                </Text>
-              </View>
-              <View style={styles.receivedMessage}>
-                <Text style={styles.messageText}>
-                  Sure! What type of NOC are you looking for?
-                </Text>
-              </View>
-              <View style={styles.sentMessage}>
-                <Text style={styles.messageText}>
-                  I need an NOC for my electricity meter transfer.
-                </Text>
-              </View>
-              <View style={styles.receivedMessage}>
-                <Text style={styles.messageText}>
-                  Alright. Do you have all the required documents?
-                </Text>
-              </View>
-              <View style={styles.sentMessage}>
-                <Text style={styles.messageText}>
-                  Yes, I have my property documents and ID proof.
-                </Text>
-              </View>
-              <View style={styles.receivedMessage}>
-                <Text style={styles.messageText}>
-                  Great! You can apply through the society office or online.
-                </Text>
-              </View>
-              <View style={styles.sentMessage}>
-                <Text style={styles.messageText}>
-                  Can I download the NOC form from the portal?
-                </Text>
-              </View>
-              <View style={styles.receivedMessage}>
-                <Text style={styles.messageText}>
-                  Yes! Log in and go to the NOC section to download it.
-                </Text>
-              </View>
-              <View style={styles.sentMessage}>
-                <Text style={styles.messageText}>
-                  Thanks! I'll check and apply soon.
-                </Text>
-              </View>
-              <View style={styles.receivedMessage}>
-                <Text style={styles.messageText}>
-                  You're welcome! Let me know if you need further help.
-                </Text>
-              </View>
-            </ScrollView>
-
-            {/* Chat Input */}
-            <View style={styles.chatFooter}>
-              <TextInput
-                style={styles.textArea}
-                placeholder="Type a message..."
-                value={messageText}
-                onChangeText={setMessageText}
-              />
-              <Button
-                mode="contained"
-                compact
-                onPress={() => console.log("Message Sent:", messageText)}
-              >
-                Send
-              </Button>
-            </View>
-
-            {/* Close Button */}
-            <Button
-              mode="outlined"
-              compact
-              onPress={() => setMessageModalVisible(false)}
-            >
-              Close
-            </Button>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Add Complain Modal */}
-      <Modal
-        visible={addComplainModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setAddComplainModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Complain</Text>
-              <TouchableOpacity
-                onPress={() => setAddComplainModalVisible(false)}
-              >
-                <Icon name="times" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
-
-            {/* <TextInput
-              style={styles.textArea1}
-              placeholder="Title"
-              value={newComplainTitle}
-              onChangeText={setNewComplainTitle}
-            />
-            <TextInput
-              style={styles.textArea1}
-              placeholder="Complain Details"
-              multiline
-              value={newComplainMessage}
-              onChangeText={setNewComplainMessage}
-            /> */}
-
-            {/* Button Container for Side-by-Side Buttons */}
-            {/* <View style={styles.buttonContainer}>
-              <Button
-                mode="contained"
-                compact
-                onPress={() => handleComplainSubmit(false)}
-                style={styles.button}
-              >
-                Save
-              </Button>
-              <Button
-                mode="outlined"
-                compact
-                onPress={() => setAddComplainModalVisible(false)}
-                style={styles.button}
-              >
-                Close
-              </Button>
-            </View> */}
-
-            <View style={styles.container2}>
-              <View style={styles.labelContainer2}>
-                <Text style={styles.label2}>Title:</Text>
-              </View>
-              <TextInput
-                placeholder="Enter Title"
-                value={newComplainTitle}
-                onChangeText={setNewComplainTitle}
-                mode="outlined"
-                style={styles.input2}
-                theme={{
-                  colors: {
-                    primary: "#4169E1",
-                    outline: "#808080",
-                  },
-                }}
-              />
-            </View>
-            <View style={styles.container2}>
-              <View style={styles.labelContainer2}>
-                <Text style={styles.label2}>Complain Details:</Text>
-              </View>
-              <TextInput
-                  placeholder="Complain Details"
-                value={newComplainMessage}
-                onChangeText={setNewComplainMessage}
-                mode="outlined"
-                style={styles.input2}
-                theme={{
-                  colors: {
-                    primary: "#4169E1",
-                    outline: "#808080",
-                  },
-                }}
-              />
-            </View>
-
-
-
-                 <View style={styles.buttonRow}>
-                          <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setAddComplainModalVisible(false)}
-                          >
-                            <Text style={styles.buttonText}>Close</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.submitButton}
-                            onPress={() => handleComplainSubmit(false)}
-                            disabled={loading}
-                          >
-                            {loading ? (
-                              <ActivityIndicator color="#fff" />
-                            ) : (
-                              <Text style={styles.buttonText}>Submit</Text>
-                            )}
-                          </TouchableOpacity>
-                        </View>
-          </View>
-        </View>
-      </Modal>
-
-      <FlashMessage position="top" />
-    </View>
+      </View>
+    </>
   );
 };
 
@@ -626,7 +456,7 @@ const styles = StyleSheet.create({
   labelContainer2: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
+    marginBlock: 5,
   },
   label2: {
     fontSize: 14,
@@ -640,13 +470,58 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 50,
   },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 15,
+    // width: "100%",
+    // position: "relative",
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    flex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    width: 350,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#fff",
+  },
+  searchInput: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+    paddingLeft: 8,
+    backgroundColor: "rgba(243, 238, 238, 0.47)",
+  },
+  header: {
+    backgroundColor: "#4169E1",
+    color: "#ffffff",
+  },
   header1: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
   },
-  title1: {
+  title: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#1a1a1a",
@@ -655,209 +530,136 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  iconButton1: {
+  iconButton: {
     marginHorizontal: -4,
     padding: 0,
   },
-  // container1: {
-  //   flex: 1,
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  // },
-  container: {
-    flex: 1,
+  iconContainer: {
+    width: 45,
+    height: 45,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
-  header: {
-    backgroundColor: "#4169E1", // Your button color
-    paddingVertical: 1, // Reduced padding for less space above and below
-    paddingHorizontal: 8,
+  actionColumn: {
+    width: 60,
   },
-  headerTitle: {
-    color: "#fff", // Text color
-    fontSize: 15, // Increase font size
-    fontWeight: "bold", // Optional: makes the text bold
+  titleText: {
+    color: "#ffffff", // Text color for titles
+    fontWeight: "bold",
   },
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
-  },
-  iconContainer: {
-    flexDirection: "row", // Align icons horizontally
-    justifyContent: "center", // Center the icons horizontally
-    alignItems: "center", // Vertically center the icons
-  },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  suggestionsText: { fontSize: 18, fontWeight: "bold" },
-  searchInput: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    marginBottom: 10,
-  },
-  // iconContainer: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  iconButton: { padding: 0, marginHorizontal: -6 },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)", // Dark transparent background
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    width: "80%",
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-  },
-  textArea1: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    minHeight: 40,
-    marginBottom: 10,
-  },
-  chatContainer: {
     width: "90%",
     backgroundColor: "#fff",
-    borderRadius: 10,
-    overflow: "hidden",
-    maxHeight: "80%", // Prevents overflow
+    padding: 20,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8, // Shadow for Android
   },
-  chatHeader: {
-    backgroundColor: "#2e86c1",
-    padding: 10,
+  // modalTitle: {
+  //   fontSize: 22,
+  //   fontWeight: "bold",
+  //   textAlign: "center",
+  //   color: "#333",
+  //   marginBottom: 15,
+  // },
+  infoContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    paddingVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
-  chatTitle: {
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#444",
+  },
+  value: {
+    fontSize: 16,
+    color: "#666",
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: "red",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  closeButtonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
   },
-  chatBody: {
-    maxHeight: 400, // Scrollable chat area
-    padding: 10,
-  },
-  chatFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-  },
-  textArea: {
+  ////////////////////edit//////////
+  modalContainer: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    borderRadius: 5,
-    marginRight: 8,
-  },
-  sentMessage: {
-    alignSelf: "flex-end",
-    backgroundColor: "#d1f2eb",
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 5,
-    maxWidth: "75%",
-  },
-  receivedMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "#ECECEC",
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 5,
-    maxWidth: "75%",
-  },
-  messageText: {
-    fontSize: 14,
-  },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)", // Semi-transparent background
   },
-  modalContent: {
-    backgroundColor: "#fff",
+  modalContentedit: {
+    backgroundColor: "white",
     padding: 20,
+    width: 350,
     borderRadius: 10,
-    width: "80%", // Reduced the width
-    minHeight: 200, // Set a minimum height
-    maxHeight: 400, // Limit the maximum height
-  },
-  modalContentForView: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
-    maxHeight: "auto",
-    minHeight: "auto",
-  },
-  modalHeaderForView: {
-    flexDirection: "row",
-    justifyContent: "space-between", // Pushes items to opposite ends
     alignItems: "center",
+  },
+  // modalTitle: {
+  //   fontSize: 18,
+  //   fontWeight: "bold",
+  //   marginBottom: 15,
+  // },
+  input: {
     width: "100%",
-    marginBottom: 15,
-  },
-
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  modalTitle: {
-    fontSize: 18, // Slightly reduced the font size
-    fontWeight: "bold",
-    color: "#000",
-  },
-  textArea1: {
+    padding: 10,
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 15,
     borderRadius: 5,
+    marginBottom: 15,
   },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
+  fileButton: {
+    backgroundColor: "#28a745",
+    padding: 10,
+    borderRadius: 5,
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 15,
   },
-  button: {
-    flex: 1,
-    marginHorizontal: 5,
+  fileButtonText: {
+    color: "white",
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    marginTop: 10,
+    marginBlock: 10,
   },
   submitButton: {
     backgroundColor: "#007bff",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 5,
     flex: 1,
     alignItems: "center",
     marginLeft: 5,
   },
-  closeButton: {
+  closeButtonedit: {
     backgroundColor: "red",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 5,
     flex: 1,
     alignItems: "center",
-    marginLeft: 5,
+    marginRight: 5,
   },
   buttonText: {
     color: "white",

@@ -126,10 +126,7 @@ const NocScreen = () => {
     }
   };
 
-  // const filteredData = nocList.filter((item) =>
-  //   item.flat_owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //   item.flat_no_name.includes(searchQuery)
-  // );
+
 
   const filteredData = nocList.filter((item) =>
     (typeof item.flat_owner_name === 'string' && item.flat_owner_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
